@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>مساعد الطلاب الذكي</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 :root {
@@ -97,8 +97,6 @@ textarea::placeholder { color:var(--light); }
   </div>
 </footer>
 <script>
-const API_KEY = "AIzaSyABfntk6o4SyqHq3Ep6VJuYsWj5k6EKsTY";
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
 let subject = '';
 let loading = false;
 
@@ -147,26 +145,21 @@ async function send() {
   inp.style.height = 'auto';
   loading = true;
   document.getElementById('sendBtn').disabled = true;
+  const sub = subject ? 'المادة: ' + subject + '. ' : '';
   addMsg('user', q);
   showLoading();
-  const sub = subject ? 'المادة: ' + subject + '. ' : '';
-  const prompt = 'أنت مساعد تعليمي ذكي للطلاب. اشرح بوضوح وسهولة باللغة العربية. كن موجزاً ومفيداً. السؤال: ' + sub + q;
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
-      })
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: sub + q })
     });
     const data = await res.json();
     removeLoader();
-    if (!res.ok || data.error) {
-      addMsg('bot', 'خطأ: ' + (data.error ? data.error.message : res.status));
+    if (data.error) {
+      addMsg('bot', 'خطأ: ' + data.error);
     } else {
-      let text = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) ? data.candidates[0].content.parts[0].text : 'عذراً، لم أتمكن من الإجابة.';
-      text = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '$1');
+      let text = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
       addMsg('bot', text + '<br><br><span class="badge">🤖 مساعد الطلاب الذكي</span>');
     }
   } catch (e) {
