@@ -12,23 +12,50 @@
   --accent:#7C3AED; --bg:#F8FAFF; --surface:#FFFFFF;
   --text:#0F172A; --muted:#64748B; --light:#94A3B8;
   --border:#E2E8F0; --success:#059669; --success-light:#ECFDF5;
-  --danger:#DC2626;
+  --danger:#DC2626; --gold:#F59E0B;
 }
 body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 
-#loginScreen { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:999; padding:20px; }
-.login-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:32px 24px; width:100%; max-width:360px; text-align:center; }
-.login-logo { font-size:52px; margin-bottom:16px; }
-.login-card h1 { font-size:20px; font-weight:700; margin-bottom:8px; }
-.login-card p { font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6; }
-.price-badge { background:var(--primary-light); color:var(--primary-dark); font-size:13px; font-weight:700; padding:6px 16px; border-radius:20px; display:inline-block; margin-bottom:20px; }
-.login-input { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:12px 16px; font-size:15px; font-family:inherit; outline:none; text-align:center; letter-spacing:3px; color:var(--text); background:var(--bg); margin-bottom:12px; transition:border-color .2s; }
-.login-input:focus { border-color:var(--primary); }
-.login-btn { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; border:none; border-radius:12px; padding:13px; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; }
-.error-msg { color:var(--danger); font-size:12px; margin-top:8px; display:none; }
-.contact-info { margin-top:20px; padding-top:16px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); line-height:1.8; }
-.contact-info a { color:var(--primary); text-decoration:none; font-weight:500; }
+/* Login */
+#loginScreen { position:fixed; inset:0; background:linear-gradient(135deg,#1E40AF,#7C3AED); display:flex; align-items:center; justify-content:center; z-index:999; padding:20px; }
+.login-card { background:var(--surface); border-radius:24px; padding:28px 22px; width:100%; max-width:380px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+.login-logo { font-size:44px; margin-bottom:12px; }
+.login-card h1 { font-size:19px; font-weight:700; margin-bottom:6px; color:var(--text); }
+.login-card > p { font-size:12px; color:var(--muted); margin-bottom:20px; line-height:1.6; }
 
+/* Plans */
+.plans { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.plan { border:2px solid var(--border); border-radius:14px; padding:12px 10px; cursor:pointer; transition:all .2s; position:relative; }
+.plan.active { border-color:var(--primary); background:var(--primary-light); }
+.plan-badge { font-size:9px; font-weight:700; padding:2px 8px; border-radius:20px; display:inline-block; margin-bottom:6px; background:var(--border); color:var(--muted); }
+.plan.active .plan-badge { background:var(--primary); color:white; }
+.plan-badge.save { background:#FEF3C7; color:#92400E; }
+.plan.active .plan-badge.save { background:var(--gold); color:white; }
+.plan-name { font-size:13px; font-weight:600; color:var(--muted); margin-bottom:4px; }
+.plan.active .plan-name { color:var(--primary-dark); }
+.plan-price { font-size:20px; font-weight:700; color:var(--text); }
+.plan-price span { font-size:11px; font-weight:400; color:var(--muted); }
+.plan.active .plan-price { color:var(--primary-dark); }
+
+/* Pay button */
+.pay-label { font-size:11px; color:var(--muted); margin-bottom:8px; }
+.pay-btns { display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-bottom:16px; }
+.pay-method-btn { display:flex; align-items:center; justify-content:center; gap:5px; border-radius:10px; padding:10px 6px; font-size:12px; font-weight:700; text-decoration:none; transition:transform .15s; }
+.pay-method-btn:hover { transform:scale(1.03); }
+.paypal-btn { background:linear-gradient(135deg,#0070BA,#003087); color:white; }
+.apple-btn { background:#000; color:white; }
+.card-btn { background:linear-gradient(135deg,#059669,#047857); color:white; }
+
+.divider { display:flex; align-items:center; gap:10px; font-size:11px; color:var(--muted); margin-bottom:12px; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.login-input { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:11px 16px; font-size:14px; font-family:inherit; outline:none; text-align:center; letter-spacing:3px; color:var(--text); background:var(--bg); margin-bottom:10px; transition:border-color .2s; }
+.login-input:focus { border-color:var(--primary); }
+.login-btn { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; border:none; border-radius:12px; padding:12px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; }
+.error-msg { color:var(--danger); font-size:12px; margin-top:8px; display:none; }
+.contact-info { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); line-height:1.7; }
+
+/* App */
 header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; box-shadow:0 1px 8px rgba(0,0,0,0.06); }
 .logo { width:38px; height:38px; background:linear-gradient(135deg,var(--primary),var(--accent)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
 .header-info h1 { font-size:15px; font-weight:700; }
@@ -43,7 +70,6 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .chip.active,.chip:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
 
 #chat { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; padding-bottom:160px; }
-
 .welcome { padding:8px 0 16px; }
 .welcome-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .welcome-icon-sm { font-size:32px; }
@@ -65,7 +91,6 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .bubble { max-width:84%; padding:11px 14px; border-radius:14px; font-size:13.5px; line-height:1.8; }
 .msg.user .bubble { background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; border-radius:14px 4px 14px 14px; }
 .msg.bot .bubble { background:var(--surface); border:1px solid var(--border); border-radius:4px 14px 14px 14px; color:var(--text); }
-
 .thinking { display:flex; gap:5px; align-items:center; padding:6px 0; }
 .thinking span { width:7px; height:7px; border-radius:50%; background:var(--light); animation:bounce 1.2s infinite; }
 .thinking span:nth-child(2){animation-delay:.2s} .thinking span:nth-child(3){animation-delay:.4s}
@@ -73,13 +98,10 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .badge { display:inline-flex; align-items:center; gap:4px; background:var(--success-light); color:var(--success); font-size:11px; padding:3px 8px; border-radius:7px; margin-top:8px; font-weight:500; }
 
 footer { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:8px 14px 14px; }
-
-/* Mode toggle */
 .mode-row { display:flex; gap:8px; margin-bottom:8px; }
 .mode-btn { flex:1; padding:8px; border-radius:10px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; border:1.5px solid var(--border); background:transparent; color:var(--muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:5px; }
 .mode-btn.active { border-color:var(--primary); background:var(--primary-light); color:var(--primary-dark); }
 .mode-btn.active.detailed { border-color:var(--accent); background:#F5F3FF; color:var(--accent); }
-
 .input-row { display:flex; gap:7px; align-items:flex-end; }
 textarea { flex:1; border:1.5px solid var(--border); border-radius:13px; padding:10px 13px; font-size:13px; font-family:inherit; resize:none; min-height:44px; max-height:110px; outline:none; transition:border-color .2s; color:var(--text); background:var(--bg); line-height:1.5; }
 textarea:focus { border-color:var(--primary); }
@@ -97,14 +119,43 @@ textarea::placeholder { color:var(--light); }
     <div class="login-logo">🎓</div>
     <h1>مساعد الطلاب الذكي</h1>
     <p>مساعدك الشخصي لشرح الدروس وحل الأسئلة بالذكاء الاصطناعي</p>
-    <div class="price-badge">✨ الاشتراك الشهري — 10 ريال فقط</div>
+
+    <div class="plans">
+      <div class="plan active" id="monthlyPlan" onclick="selectPlan('monthly')">
+        <div class="plan-badge">الأكثر شيوعاً</div>
+        <div class="plan-name">شهري</div>
+        <div class="plan-price">$2.99<span>/شهر</span></div>
+      </div>
+      <div class="plan" id="yearlyPlan" onclick="selectPlan('yearly')">
+        <div class="plan-badge save">وفّر 30%</div>
+        <div class="plan-name">سنوي</div>
+        <div class="plan-price">$24.99<span>/سنة</span></div>
+      </div>
+    </div>
+
+    <p class="pay-label">اختر طريقة الدفع</p>
+    <div class="pay-btns">
+      <a id="payBtn" href="https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ" target="_blank" class="pay-method-btn paypal-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M20.067 8.478c.492.315.844.825.983 1.39.357 1.476-.316 3.297-1.459 4.124-.96.69-2.173.996-3.654.996h-.081c-.499 0-.94.345-1.033.835l-.596 3.368-.141.797c-.051.293-.307.51-.605.51H11.06c-.425 0-.732-.393-.657-.811l.03-.161.585-3.7.037-.204c.073-.418.434-.724.857-.724h.54c3.498 0 6.235-1.42 7.036-5.527.333-1.702.161-3.123-.421-4.12a2.9 2.9 0 00-.83-.773c.607.345 1.104.857 1.43 1.5z"/><path d="M18.624 6.979c-.168-.045-.34-.084-.517-.117-.643-.117-1.347-.173-2.1-.173H10.63c-.157 0-.307.034-.44.096-.293.135-.512.41-.563.747l-1.19 7.536-.034.218c.093-.59.597-1.027 1.192-1.027h2.485c4.875 0 8.693-1.982 9.808-7.712.033-.17.062-.335.086-.498-.283-.148-.58-.276-.895-.377-.154-.049-.31-.094-.47-.133l-.485-.56z"/><path d="M9.627 7.532a.975.975 0 01.563-.747.983.983 0 01.44-.096h5.377c.753 0 1.457.057 2.1.173.177.033.35.072.517.117l.485.56c.16.039.316.084.47.133.315.101.612.229.895.377-.024.163-.053.328-.086.498-1.115 5.73-4.933 7.712-9.808 7.712H7.595c-.595 0-1.099.437-1.192 1.027L5.2 22.79c-.075.418.232.811.657.811h2.922a.872.872 0 00.861-.734l.035-.185.596-3.368.038-.207a.872.872 0 01.861-.734h.544c3.517 0 6.269-1.424 7.074-5.544.335-1.717.162-3.15-.435-4.155a3.594 3.594 0 00-1.097-1.142h-.001z"/></svg>
+        PayPal
+      </a>
+      <a id="appleBtn" href="https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ" target="_blank" class="pay-method-btn apple-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Apple Pay
+      </a>
+      <a id="cardBtn" href="https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ" target="_blank" class="pay-method-btn card-btn">
+        💳 بطاقة بنكية
+      </a>
+    </div>
+
+    <div class="divider">لديك كود دخول؟</div>
+
     <input type="text" id="codeInput" class="login-input" placeholder="أدخل كود الدخول" maxlength="8">
     <button class="login-btn" onclick="checkCode()">دخول ←</button>
     <p class="error-msg" id="errorMsg">❌ كود غير صحيح، تأكد وحاول مرة أخرى</p>
+
     <div class="contact-info">
-      للاشتراك وشراء كود الدخول<br>
-      تواصل معنا عبر واتساب<br>
-      <a href="https://wa.me/966500000000">اضغط هنا للتواصل</a>
+      بعد الدفع أرسل لنا إيصال الدفع على واتساب وسنرسل لك الكود فوراً
     </div>
   </div>
 </div>
@@ -146,6 +197,9 @@ textarea::placeholder { color:var(--light); }
 
 <script>
 const VALID_CODES = ['TALEB01','TALEB02','TALEB03','TALEB04','TALEB05','TALEB06','TALEB07','TALEB08','TALEB09','TALEB10','TALEB11','TALEB12','TALEB13','TALEB14','TALEB15','TALEB16','TALEB17','TALEB18','TALEB19','TALEB20'];
+
+const YEARLY_LINK = 'https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ';
+const MONTHLY_LINK = 'https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ';
 
 const QUESTIONS = {
   'الكل': [
@@ -195,6 +249,15 @@ const QUESTIONS = {
 let subject = 'الكل';
 let mode = 'quick';
 let loading = false;
+
+function selectPlan(plan) {
+  document.getElementById('monthlyPlan').classList.toggle('active', plan === 'monthly');
+  document.getElementById('yearlyPlan').classList.toggle('active', plan === 'yearly');
+  const link = plan === 'yearly' ? YEARLY_LINK : MONTHLY_LINK;
+  document.getElementById('payBtn').href = link;
+  document.getElementById('appleBtn').href = link;
+  document.getElementById('cardBtn').href = link;
+}
 
 function checkCode() {
   const code = document.getElementById('codeInput').value.trim().toUpperCase();
@@ -304,16 +367,13 @@ async function send() {
   inp.style.height = 'auto';
   loading = true;
   document.getElementById('sendBtn').disabled = true;
-
   const sub = subject && subject !== 'الكل' ? 'المادة: ' + subject + '. ' : '';
   const modeInstruction = mode === 'quick'
     ? 'أجب بشكل مختصر جداً في 2-3 جمل فقط. الجواب السريع فقط بدون شرح طويل.'
     : 'اشرح بشكل مفصل وكامل مع أمثلة وخطوات واضحة. استخدم العناوين والنقاط لتنظيم الشرح.';
-
   const modeLabel = mode === 'quick' ? '⚡ جواب سريع' : '📖 شرح مفصل';
   addMsg('user', (mode === 'quick' ? '⚡ ' : '📖 ') + q);
   showLoading();
-
   try {
     const res = await fetch('/api/ask', {
       method: 'POST',
@@ -325,7 +385,7 @@ async function send() {
     if (data.error) {
       addMsg('bot', 'خطأ: ' + data.error);
     } else {
-      let text = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/###\s*(.*?)<br>/g, '<b>$1</b><br>').replace(/##\s*(.*?)<br>/g, '<b>$1</b><br>');
+      let text = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/###\s*(.*?)<br>/g, '<b>$1</b><br>');
       addMsg('bot', text + '<br><br><span class="badge">' + modeLabel + '</span>');
     }
   } catch (e) {
