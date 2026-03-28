@@ -102,6 +102,11 @@ footer { position:fixed; bottom:0; left:0; right:0; background:var(--surface); b
 .mode-btn { flex:1; padding:8px; border-radius:10px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; border:1.5px solid var(--border); background:transparent; color:var(--muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:5px; }
 .mode-btn.active { border-color:var(--primary); background:var(--primary-light); color:var(--primary-dark); }
 .mode-btn.active.detailed { border-color:var(--accent); background:#F5F3FF; color:var(--accent); }
+.attach-row { display:flex; gap:7px; margin-bottom:8px; }
+.attach-btn { flex:1; padding:8px 10px; border-radius:11px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; border:1.5px solid var(--border); background:transparent; color:var(--muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.attach-btn:hover { background:var(--bg); }
+.attach-btn.img-active { border-color:#7C3AED; background:#F5F3FF; color:#7C3AED; }
+.attach-btn.pdf-active { border-color:#DC2626; background:#FEF2F2; color:#DC2626; }
 .input-row { display:flex; gap:7px; align-items:flex-end; }
 textarea { flex:1; border:1.5px solid var(--border); border-radius:13px; padding:10px 13px; font-size:13px; font-family:inherit; resize:none; min-height:44px; max-height:110px; outline:none; transition:border-color .2s; color:var(--text); background:var(--bg); line-height:1.5; }
 textarea:focus { border-color:var(--primary); }
@@ -110,6 +115,12 @@ textarea::placeholder { color:var(--light); }
 .send:hover { transform:scale(1.05); }
 .send:active { transform:scale(.96); }
 .send:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.preview-box { display:none; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 12px; margin-bottom:8px; display:none; align-items:center; gap:10px; }
+.preview-box.show { display:flex; }
+.preview-box img { width:52px; height:52px; object-fit:cover; border-radius:8px; }
+.preview-box .preview-info { flex:1; font-size:12px; color:var(--muted); }
+.preview-box .preview-info b { color:var(--text); font-size:13px; display:block; margin-bottom:2px; }
+.preview-box .remove-preview { background:none; border:none; color:var(--danger); cursor:pointer; font-size:18px; padding:0; }
 
 </style>
 </head>
@@ -188,13 +199,25 @@ textarea::placeholder { color:var(--light); }
     <button class="mode-btn active" id="quickBtn" onclick="setMode('quick')">⚡ جواب سريع</button>
     <button class="mode-btn" id="detailBtn" onclick="setMode('detailed')">📖 شرح مفصل</button>
   </div>
-  <div class="img-preview" id="imgPreview">
-    <img id="previewImg" src="" alt="صورة">
-    <button class="remove-img" onclick="removeImage()">✕</button>
+  <div class="attach-row">
+    <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(event)">
+    <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handlePDF(event)">
+    <button class="attach-btn" id="imgBtn" onclick="document.getElementById('imgInput').click()">
+      🖼️ رفع صورة
+    </button>
+    <button class="attach-btn" id="pdfBtn" onclick="document.getElementById('pdfInput').click()">
+      📄 رفع PDF
+    </button>
+  </div>
+  <div class="preview-box" id="previewBox">
+    <img id="previewImg" src="" alt="" style="display:none">
+    <div class="preview-info">
+      <b id="previewName"></b>
+      <span id="previewType"></span>
+    </div>
+    <button class="remove-preview" onclick="removeAttachment()">✕</button>
   </div>
   <div class="input-row">
-    <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(event)">
-    <button class="img-btn" onclick="document.getElementById('imgInput').click()">🖼️</button>
     <textarea id="inp" placeholder="اكتب سؤالك هنا..." rows="1"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"
       oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
@@ -257,24 +280,53 @@ let subject = 'الكل';
 let mode = 'quick';
 let loading = false;
 let currentImage = null;
+let currentPDF = null;
 
 function handleImage(event) {
   const file = event.target.files[0];
   if (!file) return;
+  currentPDF = null;
   const reader = new FileReader();
   reader.onload = function(e) {
     currentImage = e.target.result;
     document.getElementById('previewImg').src = currentImage;
-    document.getElementById('imgPreview').style.display = 'block';
+    document.getElementById('previewImg').style.display = 'block';
+    document.getElementById('previewName').textContent = file.name;
+    document.getElementById('previewType').textContent = 'صورة — اضغط إرسال لشرحها';
+    document.getElementById('previewBox').classList.add('show');
+    document.getElementById('imgBtn').classList.add('img-active');
+    document.getElementById('pdfBtn').classList.remove('pdf-active');
     document.getElementById('inp').placeholder = 'اكتب سؤالك عن الصورة... (اختياري)';
   };
   reader.readAsDataURL(file);
 }
 
-function removeImage() {
+function handlePDF(event) {
+  const file = event.target.files[0];
+  if (!file) return;
   currentImage = null;
-  document.getElementById('imgPreview').style.display = 'none';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentPDF = e.target.result.split(',')[1];
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('previewName').textContent = file.name;
+    document.getElementById('previewType').textContent = 'PDF — سيتم تلخيصه وشرحه';
+    document.getElementById('previewBox').classList.add('show');
+    document.getElementById('pdfBtn').classList.add('pdf-active');
+    document.getElementById('imgBtn').classList.remove('img-active');
+    document.getElementById('inp').placeholder = 'اكتب سؤالك عن الـ PDF... (اختياري)';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeAttachment() {
+  currentImage = null;
+  currentPDF = null;
+  document.getElementById('previewBox').classList.remove('show');
   document.getElementById('imgInput').value = '';
+  document.getElementById('pdfInput').value = '';
+  document.getElementById('imgBtn').classList.remove('img-active');
+  document.getElementById('pdfBtn').classList.remove('pdf-active');
   document.getElementById('inp').placeholder = 'اكتب سؤالك هنا...';
 }
 
@@ -390,7 +442,7 @@ async function send() {
   if (loading) return;
   const inp = document.getElementById('inp');
   const q = inp.value.trim();
-  if (!q && !currentImage) return;
+  if (!q && !currentImage && !currentPDF) return;
   inp.value = '';
   inp.style.height = 'auto';
   loading = true;
@@ -402,13 +454,17 @@ async function send() {
   const modeLabel = mode === 'quick' ? '⚡ جواب سريع' : '📖 شرح مفصل';
 
   const imgToSend = currentImage;
+  const pdfToSend = currentPDF;
+
   let userBubble = '';
   if (imgToSend) userBubble += '<img src="' + imgToSend + '" style="max-width:200px;border-radius:10px;display:block;margin-bottom:6px">';
+  if (pdfToSend) userBubble += '📄 ملف PDF<br>';
   if (q) userBubble += (mode === 'quick' ? '⚡ ' : '📖 ') + q;
-  else userBubble += '📷 اشرح هذه الصورة';
+  else if (imgToSend) userBubble += '📷 اشرح هذه الصورة';
+  else userBubble += '📄 لخص هذا الـ PDF';
   addMsg('user', userBubble);
 
-  removeImage();
+  removeAttachment();
   showLoading();
 
   try {
@@ -416,6 +472,9 @@ async function send() {
     if (imgToSend) {
       body.image = imgToSend.split(',')[1];
       body.question = sub + (q || 'اشرح ما تراه في هذه الصورة بالتفصيل');
+    } else if (pdfToSend) {
+      body.pdf = pdfToSend;
+      body.question = sub + (q || 'لخص هذا الملف واشرح أهم نقاطه');
     } else {
       body.question = sub + q;
     }
