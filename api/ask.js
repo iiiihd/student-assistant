@@ -5,14 +5,17 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { question, instruction, image } = req.body;
-  if (!question && !image) return res.status(400).json({ error: 'No question provided' });
+  const { question, instruction, image, pdf } = req.body;
+  if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
 
   const API_KEY = process.env.OPENAI_API_KEY;
   const systemPrompt = 'أنت مساعد تعليمي ذكي للطلاب. ' + (instruction || 'اشرح بوضوح وسهولة باللغة العربية.');
 
   let messages;
+  let model = 'gpt-4o-mini';
+
   if (image) {
+    model = 'gpt-4o';
     messages = [
       { role: 'system', content: systemPrompt },
       {
@@ -20,6 +23,18 @@ export default async function handler(req, res) {
         content: [
           { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + image } },
           { type: 'text', text: question || 'اشرح ما تراه في هذه الصورة بالتفصيل' }
+        ]
+      }
+    ];
+  } else if (pdf) {
+    model = 'gpt-4o';
+    messages = [
+      { role: 'system', content: systemPrompt },
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: question || 'لخص هذا الملف واشرح أهم نقاطه بالعربي' },
+          { type: 'image_url', image_url: { url: 'data:application/pdf;base64,' + pdf } }
         ]
       }
     ];
@@ -37,11 +52,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + API_KEY
       },
-      body: JSON.stringify({
-        model: image ? 'gpt-4o' : 'gpt-4o-mini',
-        messages: messages,
-        max_tokens: 1500
-      })
+      body: JSON.stringify({ model, messages, max_tokens: 2000 })
     });
 
     const data = await response.json();
