@@ -110,6 +110,7 @@ textarea::placeholder { color:var(--light); }
 .send:hover { transform:scale(1.05); }
 .send:active { transform:scale(.96); }
 .send:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
 </style>
 </head>
 <body>
@@ -187,7 +188,13 @@ textarea::placeholder { color:var(--light); }
     <button class="mode-btn active" id="quickBtn" onclick="setMode('quick')">⚡ جواب سريع</button>
     <button class="mode-btn" id="detailBtn" onclick="setMode('detailed')">📖 شرح مفصل</button>
   </div>
+  <div class="img-preview" id="imgPreview">
+    <img id="previewImg" src="" alt="صورة">
+    <button class="remove-img" onclick="removeImage()">✕</button>
+  </div>
   <div class="input-row">
+    <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(event)">
+    <button class="img-btn" onclick="document.getElementById('imgInput').click()">🖼️</button>
     <textarea id="inp" placeholder="اكتب سؤالك هنا..." rows="1"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"
       oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
@@ -249,6 +256,27 @@ const QUESTIONS = {
 let subject = 'الكل';
 let mode = 'quick';
 let loading = false;
+let currentImage = null;
+
+function handleImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentImage = e.target.result;
+    document.getElementById('previewImg').src = currentImage;
+    document.getElementById('imgPreview').style.display = 'block';
+    document.getElementById('inp').placeholder = 'اكتب سؤالك عن الصورة... (اختياري)';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  currentImage = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgInput').value = '';
+  document.getElementById('inp').placeholder = 'اكتب سؤالك هنا...';
+}
 
 function selectPlan(plan) {
   document.getElementById('monthlyPlan').classList.toggle('active', plan === 'monthly');
@@ -362,23 +390,40 @@ async function send() {
   if (loading) return;
   const inp = document.getElementById('inp');
   const q = inp.value.trim();
-  if (!q) return;
+  if (!q && !currentImage) return;
   inp.value = '';
   inp.style.height = 'auto';
   loading = true;
   document.getElementById('sendBtn').disabled = true;
   const sub = subject && subject !== 'الكل' ? 'المادة: ' + subject + '. ' : '';
   const modeInstruction = mode === 'quick'
-    ? 'أجب بشكل مختصر جداً في 2-3 جمل فقط. الجواب السريع فقط بدون شرح طويل.'
-    : 'اشرح بشكل مفصل وكامل مع أمثلة وخطوات واضحة. استخدم العناوين والنقاط لتنظيم الشرح.';
+    ? 'أجب بشكل مختصر جداً في 2-3 جمل فقط.'
+    : 'اشرح بشكل مفصل وكامل مع أمثلة وخطوات واضحة.';
   const modeLabel = mode === 'quick' ? '⚡ جواب سريع' : '📖 شرح مفصل';
-  addMsg('user', (mode === 'quick' ? '⚡ ' : '📖 ') + q);
+
+  const imgToSend = currentImage;
+  let userBubble = '';
+  if (imgToSend) userBubble += '<img src="' + imgToSend + '" style="max-width:200px;border-radius:10px;display:block;margin-bottom:6px">';
+  if (q) userBubble += (mode === 'quick' ? '⚡ ' : '📖 ') + q;
+  else userBubble += '📷 اشرح هذه الصورة';
+  addMsg('user', userBubble);
+
+  removeImage();
   showLoading();
+
   try {
+    const body = { instruction: modeInstruction };
+    if (imgToSend) {
+      body.image = imgToSend.split(',')[1];
+      body.question = sub + (q || 'اشرح ما تراه في هذه الصورة بالتفصيل');
+    } else {
+      body.question = sub + q;
+    }
+
     const res = await fetch('/api/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: sub + q, instruction: modeInstruction })
+      body: JSON.stringify(body)
     });
     const data = await res.json();
     removeLoader();
