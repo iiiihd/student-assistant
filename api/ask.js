@@ -4,23 +4,24 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  const { question } = req.body;
+  const { question, instruction } = req.body;
   if (!question) return res.status(400).json({ error: 'No question provided' });
   const API_KEY = process.env.OPENAI_API_KEY;
+  const systemPrompt = `أنت مساعد تعليمي ذكي للطلاب. ${instruction || 'اشرح بوضوح وسهولة باللغة العربية.'}`;
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
+        'Authorization': 'Bearer ' + API_KEY
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'أنت مساعد تعليمي ذكي للطلاب. اشرح بوضوح وسهولة باللغة العربية. كن موجزاً ومفيداً.' },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: question }
         ],
-        max_tokens: 1000
+        max_tokens: 1500
       })
     });
     const data = await response.json();
