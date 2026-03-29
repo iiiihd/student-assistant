@@ -330,6 +330,15 @@ function removeAttachment() {
   document.getElementById('inp').placeholder = 'اكتب سؤالك هنا...';
 }
 
+function getDeviceId() {
+  let id = localStorage.getItem('deviceId');
+  if (!id) {
+    id = 'DEV-' + Math.random().toString(36).substr(2,9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+    localStorage.setItem('deviceId', id);
+  }
+  return id;
+}
+
 function selectPlan(plan) {
   document.getElementById('monthlyPlan').classList.toggle('active', plan === 'monthly');
   document.getElementById('yearlyPlan').classList.toggle('active', plan === 'yearly');
@@ -339,15 +348,47 @@ function selectPlan(plan) {
   document.getElementById('cardBtn').href = link;
 }
 
-function checkCode() {
+async function checkCode() {
   const code = document.getElementById('codeInput').value.trim().toUpperCase();
-  if (VALID_CODES.includes(code)) {
-    localStorage.setItem('studentCode', code);
-    document.getElementById('loginScreen').style.display = 'none';
-    showWelcome('الكل', '🌟');
-  } else {
-    document.getElementById('errorMsg').style.display = 'block';
+  const errorMsg = document.getElementById('errorMsg');
+  const btn = document.querySelector('.login-btn');
+
+  if (!code) return;
+
+  btn.textContent = 'جاري التحقق...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'verify',
+        code: code,
+        deviceId: getDeviceId()
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.valid) {
+      localStorage.setItem('studentCode', code);
+      document.getElementById('loginScreen').style.display = 'none';
+      showWelcome('الكل', '🌟');
+    } else if (data.reason === 'device') {
+      errorMsg.textContent = '⛔ هذا الكود مرتبط بجهاز آخر، تواصل معنا للمساعدة';
+      errorMsg.style.display = 'block';
+    } else {
+      errorMsg.textContent = '❌ كود غير صحيح، تأكد وحاول مرة أخرى';
+      errorMsg.style.display = 'block';
+    }
+  } catch (e) {
+    errorMsg.textContent = '❌ خطأ في الاتصال، حاول مرة أخرى';
+    errorMsg.style.display = 'block';
   }
+
+  btn.textContent = 'دخول ←';
+  btn.disabled = false;
 }
 
 function logout() {
@@ -355,7 +396,7 @@ function logout() {
   location.reload();
 }
 
-if (localStorage.getItem('studentCode') && VALID_CODES.includes(localStorage.getItem('studentCode'))) {
+if (localStorage.getItem('studentCode')) {
   document.getElementById('loginScreen').style.display = 'none';
   showWelcome('الكل', '🌟');
 }
