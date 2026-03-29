@@ -26,13 +26,9 @@ export default async function handler(req, res) {
 
   async function kvSet(key, deviceId, expiry, type) {
     try {
-      const r = await fetch(`${KV_URL}/hset/${key}`, {
-        method: 'POST',
-        headers: { 
-          Authorization: `Bearer ${KV_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ deviceId, expiry: String(expiry), type })
+      const r = await fetch(`${KV_URL}/hset/${key}/deviceId/${encodeURIComponent(deviceId)}/expiry/${expiry}/type/${type}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
       const d = await r.json();
       console.log('kvSet result:', JSON.stringify(d));
