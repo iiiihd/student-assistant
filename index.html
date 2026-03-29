@@ -56,12 +56,17 @@ body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); colo
 .contact-info { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); line-height:1.7; }
 
 /* App */
-header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; box-shadow:0 1px 8px rgba(0,0,0,0.06); }
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; box-shadow:0 1px 8px rgba(0,0,0,0.06); flex-wrap:wrap; }
 .logo { width:38px; height:38px; background:linear-gradient(135deg,var(--primary),var(--accent)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
 .header-info h1 { font-size:15px; font-weight:700; }
 .header-info p { font-size:11px; color:var(--muted); }
-.dot { width:8px; height:8px; background:var(--success); border-radius:50%; margin-right:auto; animation:pulse 2s infinite; }
+.dot { width:8px; height:8px; background:var(--success); border-radius:50%; animation:pulse 2s infinite; }
 .logout-btn { background:none; border:1px solid var(--border); border-radius:8px; padding:4px 10px; font-size:11px; color:var(--muted); cursor:pointer; font-family:inherit; }
+.sub-timer { margin-right:auto; display:flex; align-items:center; gap:6px; }
+.timer-badge { font-size:10px; padding:3px 8px; border-radius:20px; font-weight:600; }
+.timer-badge.vip { background:#FEF3C7; color:#92400E; }
+.timer-badge.active { background:var(--success-light); color:var(--success); }
+.timer-badge.warning { background:#FEF2F2; color:#DC2626; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
 .subjects { background:var(--surface); padding:8px 12px; border-bottom:1px solid var(--border); display:flex; gap:6px; overflow-x:auto; flex-shrink:0; scrollbar-width:none; }
@@ -178,7 +183,10 @@ textarea::placeholder { color:var(--light); }
     <h1>مساعد الطلاب الذكي</h1>
     <p>مساعدك الذكي لشرح الدروس</p>
   </div>
-  <div class="dot"></div>
+  <div class="sub-timer">
+    <div class="dot"></div>
+    <span class="timer-badge active" id="timerBadge">جاري التحميل...</span>
+  </div>
   <button class="logout-btn" onclick="logout()">خروج</button>
 </header>
 
@@ -330,7 +338,46 @@ function removeAttachment() {
   document.getElementById('inp').placeholder = 'اكتب سؤالك هنا...';
 }
 
-function getDeviceId() {
+function updateTimer() {
+  const expiry = parseInt(localStorage.getItem('codeExpiry') || '0');
+  const type = localStorage.getItem('codeType') || 'vip';
+  const badge = document.getElementById('timerBadge');
+  if (!badge) return;
+
+  if (type === 'vip' || expiry === 0) {
+    badge.textContent = '⭐ اشتراك دائم';
+    badge.className = 'timer-badge vip';
+    return;
+  }
+
+  const now = Date.now();
+  const remaining = expiry - now;
+
+  if (remaining <= 0) {
+    badge.textContent = '⚠️ انتهى الاشتراك';
+    badge.className = 'timer-badge warning';
+    return;
+  }
+
+  const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+  if (days > 7) {
+    badge.textContent = '✅ ' + days + ' يوم متبقي';
+    badge.className = 'timer-badge active';
+  } else if (days > 0) {
+    badge.textContent = '⏰ ' + days + ' يوم و' + hours + ' ساعة';
+    badge.className = 'timer-badge warning';
+  } else {
+    badge.textContent = '⚠️ ' + hours + ' ساعة متبقية';
+    badge.className = 'timer-badge warning';
+  }
+}
+
+function startTimer() {
+  updateTimer();
+  setInterval(updateTimer, 60000);
+}
   let id = localStorage.getItem('deviceId');
   if (!id) {
     id = 'DEV-' + Math.random().toString(36).substr(2,9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
@@ -373,10 +420,11 @@ async function checkCode() {
 
     if (data.valid) {
       localStorage.setItem('studentCode', code);
-      localStorage.setItem('codeType', data.type);
-      localStorage.setItem('codeExpiry', data.expiry);
+      localStorage.setItem('codeType', data.type || 'vip');
+      localStorage.setItem('codeExpiry', data.expiry || '0');
       document.getElementById('loginScreen').style.display = 'none';
       showWelcome('الكل', '🌟');
+      startTimer();
     } else if (data.reason === 'device') {
       errorMsg.textContent = '⛔ هذا الكود مرتبط بجهاز آخر، تواصل معنا للمساعدة';
       errorMsg.style.display = 'block';
@@ -404,6 +452,7 @@ function logout() {
 if (localStorage.getItem('studentCode')) {
   document.getElementById('loginScreen').style.display = 'none';
   showWelcome('الكل', '🌟');
+  startTimer();
 }
 
 document.getElementById('codeInput').addEventListener('keydown', function(e) {
