@@ -22,8 +22,13 @@ export default async function handler(req, res) {
 
   async function kvSet(key, value) {
     try {
-      const r = await fetch(`${KV_URL}/set/${key}/${encodeURIComponent(value)}`, {
-        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      const r = await fetch(`${KV_URL}/set/${key}`, {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${KV_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([key, value])
       });
       return await r.json();
     } catch(e) { return null; }
@@ -63,11 +68,11 @@ export default async function handler(req, res) {
       return res.status(200).json({ valid: true, type, expiry: 0 });
     }
 
-    const savedDevice = parts[0];
+    const savedDevice = parts[0].trim();
     const savedExpiry = parseInt(parts[1]) || 0;
     const savedType = parts[2] || type;
 
-    console.log('savedDevice:', savedDevice, 'deviceId:', deviceId);
+    console.log('Comparing devices - saved:', savedDevice, 'current:', deviceId, 'match:', savedDevice === deviceId);
 
     if (savedDevice !== deviceId) {
       return res.status(200).json({ valid: false, reason: 'device' });
