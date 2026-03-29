@@ -16,38 +16,29 @@ export default async function handler(req, res) {
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
       const d = await r.json();
-      console.log('kvGet raw result:', JSON.stringify(d));
-      return d.result;
-    } catch(e) { 
-      console.log('kvGet error:', e.message);
-      return null; 
-    }
-  }
-
-  async function kvSet(key, deviceId, expiry, type) {
-    try {
-      const r = await fetch(`${KV_URL}/hset/${key}/deviceId/${encodeURIComponent(deviceId)}/expiry/${expiry}/type/${type}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${KV_TOKEN}` }
-      });
-      const d = await r.json();
-      console.log('kvSet result:', JSON.stringify(d));
-      return d;
-    } catch(e) { 
-      console.log('kvSet error:', e.message);
-      return null; 
-    }
-  }
-
-  async function kvHGet(key, field) {
-    try {
-      const r = await fetch(`${KV_URL}/hget/${key}/${field}`, {
-        headers: { Authorization: `Bearer ${KV_TOKEN}` }
-      });
-      const d = await r.json();
-      console.log('kvHGet', field, ':', JSON.stringify(d));
       return d.result;
     } catch(e) { return null; }
+  }
+
+  async function kvSet(key, value, expirySeconds) {
+    try {
+      let url = `${KV_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`;
+      if (expirySeconds) url += `/ex/${expirySeconds}`;
+      const r = await fetch(url, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const d = await r.json();
+      console.log('kvSet:', JSON.stringify(d));
+      return d;
+    } catch(e) { return null; }
+  }
+
+  async function kvDel(key) {
+    try {
+      await fetch(`${KV_URL}/del/${encodeURIComponent(key)}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+    } catch(e) {}
   }
 
   const VIP_CODES = new Set(['AH80','AH23','SKY77','GEM55']);
@@ -65,33 +56,29 @@ export default async function handler(req, res) {
       return res.status(200).json({ valid: false, reason: 'invalid' });
     }
 
-    const savedDevice = await kvHGet('code_' + code, 'deviceId');
-    console.log('savedDevice from hget:', JSON.stringify(savedDevice));
+    const deviceKey = 'dev_' + code;
+    const expiryKey = 'exp_' + code;
+
+    const savedDevice = await kvGet(deviceKey);
+    console.log('savedDevice:', savedDevice, 'currentDevice:', deviceId);
 
     if (!savedDevice) {
-      const now = Date.now();
-      let expiry = 0;
-      if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
-      if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
-      await kvSet('code_' + code, deviceId, expiry, type);
-      return res.status(200).json({ valid: true, type, expiry });
+      let expirySeconds = 0;
+      if (type === 'monthly') expirySeconds = 30 * 24 * 60 * 60;
+      if (type === 'yearly') expirySeconds = 365 * 24 * 60 * 60;
+      
+      await kvSet(deviceKey, deviceId, expirySeconds);
+      if (expirySeconds > 0) await kvSet(expiryKey, String(Date.now() + expirySeconds * 1000));
+      
+      return res.status(200).json({ valid: true, type });
     }
 
-    console.log('Comparing - saved:', JSON.stringify(savedDevice), 'current:', JSON.stringify(deviceId), 'match:', savedDevice === deviceId);
-
     if (savedDevice !== deviceId) {
+      console.log('Device mismatch!');
       return res.status(200).json({ valid: false, reason: 'device' });
     }
 
-    const savedExpiry = await kvHGet('code_' + code, 'expiry');
-    const expiry = parseInt(savedExpiry) || 0;
-
-    if (expiry !== 0 && Date.now() > expiry) {
-      return res.status(200).json({ valid: false, reason: 'expired' });
-    }
-
-    const savedType = await kvHGet('code_' + code, 'type') || type;
-    return res.status(200).json({ valid: true, type: savedType, expiry });
+    return res.status(200).json({ valid: true, type });
   }
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
