@@ -13,6 +13,7 @@ export default async function handler(req, res) {
   async function kvGet(key) {
     try {
       const r = await fetch(`${KV_URL}/get/${encodeURIComponent(key)}`, {
+        method: 'GET',
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
       const d = await r.json();
@@ -22,13 +23,9 @@ export default async function handler(req, res) {
 
   async function kvSet(key, value) {
     try {
-      await fetch(`${KV_URL}/set/${encodeURIComponent(key)}`, {
-        method: 'POST',
-        headers: { 
-          Authorization: `Bearer ${KV_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ value })
+      await fetch(`${KV_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
     } catch(e) {}
   }
@@ -47,7 +44,37 @@ export default async function handler(req, res) {
     if (!type) {
       return res.status(200).json({ valid: false, reason: 'invalid' });
     }
-    return res.status(200).json({ valid: true, type, expiry: 0 });
+
+    const savedData = await kvGet('code_' + code);
+
+    if (!savedData) {
+      const now = Date.now();
+      let expiry = 0;
+      if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
+      if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
+      const dataToSave = deviceId + '|' + expiry + '|' + type;
+      await kvSet('code_' + code, dataToSave);
+      return res.status(200).json({ valid: true, type, expiry });
+    }
+
+    const parts = savedData.split('|');
+    if (parts.length < 3) {
+      return res.status(200).json({ valid: false, reason: 'error' });
+    }
+
+    const savedDevice = parts[0];
+    const savedExpiry = parseInt(parts[1]);
+    const savedType = parts[2];
+
+    if (savedDevice !== deviceId) {
+      return res.status(200).json({ valid: false, reason: 'device' });
+    }
+
+    if (savedExpiry !== 0 && Date.now() > savedExpiry) {
+      return res.status(200).json({ valid: false, reason: 'expired' });
+    }
+
+    return res.status(200).json({ valid: true, type: savedType, expiry: savedExpiry });
   }
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
