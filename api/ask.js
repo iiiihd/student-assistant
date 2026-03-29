@@ -57,13 +57,13 @@ export default async function handler(req, res) {
       let expiry = 0;
       if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
       if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
-      const dataToSave = deviceId + '|' + expiry + '|' + type;
+      const dataToSave = deviceId + '~' + expiry + '~' + type;
       const setResult = await kvSet('code_' + code, dataToSave);
       console.log('KV set result:', JSON.stringify(setResult));
       return res.status(200).json({ valid: true, type, expiry });
     }
 
-    const parts = String(savedData).split('|');
+    const parts = String(savedData).split('~');
     console.log('Raw savedData:', JSON.stringify(savedData));
     console.log('Parts:', JSON.stringify(parts));
     console.log('Parts length:', parts.length);
