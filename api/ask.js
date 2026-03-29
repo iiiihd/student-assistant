@@ -68,9 +68,10 @@ export default async function handler(req, res) {
       if (type === 'yearly') expirySeconds = 365 * 24 * 60 * 60;
       
       await kvSet(deviceKey, deviceId, expirySeconds);
-      if (expirySeconds > 0) await kvSet(expiryKey, String(Date.now() + expirySeconds * 1000));
+      const expiryTimestamp = expirySeconds > 0 ? Date.now() + expirySeconds * 1000 : 0;
+      if (expirySeconds > 0) await kvSet(expiryKey, String(expiryTimestamp));
       
-      return res.status(200).json({ valid: true, type });
+      return res.status(200).json({ valid: true, type, expiry: expiryTimestamp });
     }
 
     if (savedDevice !== deviceId) {
@@ -78,7 +79,14 @@ export default async function handler(req, res) {
       return res.status(200).json({ valid: false, reason: 'device' });
     }
 
-    return res.status(200).json({ valid: true, type });
+    const savedExpiry = await kvGet(expiryKey);
+    const expiryTimestamp = parseInt(savedExpiry) || 0;
+
+    if (expiryTimestamp !== 0 && Date.now() > expiryTimestamp) {
+      return res.status(200).json({ valid: false, reason: 'expired' });
+    }
+
+    return res.status(200).json({ valid: true, type, expiry: expiryTimestamp });
   }
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
