@@ -22,13 +22,13 @@ export default async function handler(req, res) {
 
   async function kvSet(key, value) {
     try {
-      const r = await fetch(`${KV_URL}/set/${key}`, {
+      const r = await fetch(`${KV_URL}/pipeline`, {
         method: 'POST',
         headers: { 
           Authorization: `Bearer ${KV_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify([key, value])
+        body: JSON.stringify([['SET', key, value]])
       });
       return await r.json();
     } catch(e) { return null; }
@@ -64,6 +64,9 @@ export default async function handler(req, res) {
     }
 
     const parts = String(savedData).split('|');
+    console.log('Raw savedData:', JSON.stringify(savedData));
+    console.log('Parts:', JSON.stringify(parts));
+    console.log('Parts length:', parts.length);
     if (parts.length < 2) {
       return res.status(200).json({ valid: true, type, expiry: 0 });
     }
@@ -72,7 +75,9 @@ export default async function handler(req, res) {
     const savedExpiry = parseInt(parts[1]) || 0;
     const savedType = parts[2] || type;
 
-    console.log('Comparing devices - saved:', savedDevice, 'current:', deviceId, 'match:', savedDevice === deviceId);
+    console.log('savedDevice:', JSON.stringify(savedDevice));
+    console.log('deviceId:', JSON.stringify(deviceId));
+    console.log('match:', savedDevice === deviceId);
 
     if (savedDevice !== deviceId) {
       return res.status(200).json({ valid: false, reason: 'device' });
