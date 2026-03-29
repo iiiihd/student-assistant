@@ -23,31 +23,55 @@ export default async function handler(req, res) {
   async function kvSet(key, value) {
     try {
       await fetch(`${KV_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-        method: 'GET',
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
     } catch(e) {}
   }
 
-  const VALID_CODES = new Set(['AH80','AH23','SKY77','GEM55','X7K2M9','Q4R8P1','W3N6T5','B9H4L2','F6J1N8','Y2P5R7','D8M3K6','G1T9W4','C5N2Q8','H7R4X1','J3L6B9','K8W1F5','M2Y7D3','N4T8G6','P9C3H2','R1X6J4','S5B2M7','T7Q9L1','V3F4N8','Z6H1W5','00V7H1','00VPL3','04QQ3R','057QGC','07J0ME','07QNW9','080DCP','09G7S0','0C59JV','0D0R0O','0DYVR1','0FEWK4','0FTUDR','0GAYH0','0M0GIQ','0MXB5F','0N4V8N','0OA3HR','0P5CMW','0PG2UN']);
+  const VIP_CODES = new Set(['AH80','AH23','SKY77','GEM55']);
+
+  function getCodeType(code) {
+    if (VIP_CODES.has(code)) return 'vip';
+    if (code.startsWith('M')) return 'monthly';
+    if (code.startsWith('Y')) return 'yearly';
+    return null;
+  }
 
   if (action === 'verify') {
-    if (!VALID_CODES.has(code)) {
+    const type = getCodeType(code);
+
+    if (!type) {
       return res.status(200).json({ valid: false, reason: 'invalid' });
     }
 
-    const savedDevice = await kvGet('code_' + code);
+    const savedData = await kvGet('code_' + code);
 
-    if (!savedDevice) {
-      await kvSet('code_' + code, deviceId);
-      return res.status(200).json({ valid: true });
+    if (!savedData) {
+      const now = Date.now();
+      let expiry = 0;
+      if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
+      if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
+      if (type === 'vip') expiry = 0;
+
+      const data = JSON.stringify({ deviceId, expiry, type });
+      await kvSet('code_' + code, data);
+      return res.status(200).json({ valid: true, type, expiry });
     }
 
-    if (savedDevice === deviceId) {
-      return res.status(200).json({ valid: true });
+    let parsed;
+    try { parsed = JSON.parse(savedData); } catch(e) {
+      return res.status(200).json({ valid: false, reason: 'error' });
     }
 
-    return res.status(200).json({ valid: false, reason: 'device' });
+    if (parsed.deviceId !== deviceId) {
+      return res.status(200).json({ valid: false, reason: 'device' });
+    }
+
+    if (parsed.expiry !== 0 && Date.now() > parsed.expiry) {
+      return res.status(200).json({ valid: false, reason: 'expired' });
+    }
+
+    return res.status(200).json({ valid: true, type: parsed.type, expiry: parsed.expiry });
   }
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
