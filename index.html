@@ -378,6 +378,8 @@ function startTimer() {
   updateTimer();
   setInterval(updateTimer, 60000);
 }
+
+function getDeviceId() {
   let id = localStorage.getItem('deviceId');
   if (!id) {
     id = 'DEV-' + Math.random().toString(36).substr(2,9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
