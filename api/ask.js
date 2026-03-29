@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   }
 
   if (action === 'verify') {
-    const VALID_CODES = ['TALEB01','TALEB02','TALEB03','TALEB04','TALEB05','TALEB06','TALEB07','TALEB08','TALEB09','TALEB10','TALEB11','TALEB12','TALEB13','TALEB14','TALEB15','TALEB16','TALEB17','TALEB18','TALEB19','TALEB20'];
+    const VALID_CODES = ['X7K2M9','Q4R8P1','W3N6T5','B9H4L2','F6J1N8','Y2P5R7','D8M3K6','G1T9W4','C5N2Q8','H7R4X1','J3L6B9','K8W1F5','M2Y7D3','N4T8G6','P9C3H2','R1X6J4','S5B2M7','T7Q9L1','V3F4N8','Z6H1W5','AH23','SKY77','GEM55'];
 
     if (!VALID_CODES.includes(code)) {
       return res.status(200).json({ valid: false, reason: 'invalid' });
