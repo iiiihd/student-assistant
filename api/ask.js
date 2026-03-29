@@ -22,8 +22,13 @@ export default async function handler(req, res) {
 
   async function kvSet(key, value) {
     try {
-      await fetch(`${KV_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      await fetch(`${KV_URL}/set/${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${KV_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ value })
       });
     } catch(e) {}
   }
@@ -39,39 +44,10 @@ export default async function handler(req, res) {
 
   if (action === 'verify') {
     const type = getCodeType(code);
-
     if (!type) {
       return res.status(200).json({ valid: false, reason: 'invalid' });
     }
-
-    const savedData = await kvGet('code_' + code);
-
-    if (!savedData) {
-      const now = Date.now();
-      let expiry = 0;
-      if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
-      if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
-      if (type === 'vip') expiry = 0;
-
-      const data = JSON.stringify({ deviceId, expiry, type });
-      await kvSet('code_' + code, data);
-      return res.status(200).json({ valid: true, type, expiry });
-    }
-
-    let parsed;
-    try { parsed = JSON.parse(savedData); } catch(e) {
-      return res.status(200).json({ valid: false, reason: 'error' });
-    }
-
-    if (parsed.deviceId !== deviceId) {
-      return res.status(200).json({ valid: false, reason: 'device' });
-    }
-
-    if (parsed.expiry !== 0 && Date.now() > parsed.expiry) {
-      return res.status(200).json({ valid: false, reason: 'expired' });
-    }
-
-    return res.status(200).json({ valid: true, type: parsed.type, expiry: parsed.expiry });
+    return res.status(200).json({ valid: true, type, expiry: 0 });
   }
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
