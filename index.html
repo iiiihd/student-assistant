@@ -373,10 +373,15 @@ async function checkCode() {
 
     if (data.valid) {
       localStorage.setItem('studentCode', code);
+      localStorage.setItem('codeType', data.type);
+      localStorage.setItem('codeExpiry', data.expiry);
       document.getElementById('loginScreen').style.display = 'none';
       showWelcome('الكل', '🌟');
     } else if (data.reason === 'device') {
       errorMsg.textContent = '⛔ هذا الكود مرتبط بجهاز آخر، تواصل معنا للمساعدة';
+      errorMsg.style.display = 'block';
+    } else if (data.reason === 'expired') {
+      errorMsg.textContent = '⏰ انتهى اشتراكك، جدد الآن عبر PayPal';
       errorMsg.style.display = 'block';
     } else {
       errorMsg.textContent = '❌ كود غير صحيح، تأكد وحاول مرة أخرى';
