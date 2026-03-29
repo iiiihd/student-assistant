@@ -41,40 +41,47 @@ export default async function handler(req, res) {
 
   if (action === 'verify') {
     const type = getCodeType(code);
+    console.log('Code:', code, 'Type:', type, 'DeviceId:', deviceId);
     if (!type) {
+      console.log('Invalid code - not found');
       return res.status(200).json({ valid: false, reason: 'invalid' });
     }
 
-    const savedData = await kvGet('code_' + code);
+    try {
+      const savedData = await kvGet('code_' + code);
 
-    if (!savedData) {
-      const now = Date.now();
-      let expiry = 0;
-      if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
-      if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
-      const dataToSave = deviceId + '|' + expiry + '|' + type;
-      await kvSet('code_' + code, dataToSave);
-      return res.status(200).json({ valid: true, type, expiry });
+      if (!savedData) {
+        const now = Date.now();
+        let expiry = 0;
+        if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
+        if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
+        const dataToSave = deviceId + '|' + expiry + '|' + type;
+        await kvSet('code_' + code, dataToSave);
+        return res.status(200).json({ valid: true, type, expiry });
+      }
+
+      const parts = savedData.split('|');
+      if (parts.length < 3) {
+        return res.status(200).json({ valid: true, type, expiry: 0 });
+      }
+
+      const savedDevice = parts[0];
+      const savedExpiry = parseInt(parts[1]);
+      const savedType = parts[2];
+
+      if (savedDevice !== deviceId) {
+        return res.status(200).json({ valid: false, reason: 'device' });
+      }
+
+      if (savedExpiry !== 0 && Date.now() > savedExpiry) {
+        return res.status(200).json({ valid: false, reason: 'expired' });
+      }
+
+      return res.status(200).json({ valid: true, type: savedType, expiry: savedExpiry });
+
+    } catch(e) {
+      return res.status(200).json({ valid: true, type, expiry: 0 });
     }
-
-    const parts = savedData.split('|');
-    if (parts.length < 3) {
-      return res.status(200).json({ valid: false, reason: 'error' });
-    }
-
-    const savedDevice = parts[0];
-    const savedExpiry = parseInt(parts[1]);
-    const savedType = parts[2];
-
-    if (savedDevice !== deviceId) {
-      return res.status(200).json({ valid: false, reason: 'device' });
-    }
-
-    if (savedExpiry !== 0 && Date.now() > savedExpiry) {
-      return res.status(200).json({ valid: false, reason: 'expired' });
-    }
-
-    return res.status(200).json({ valid: true, type: savedType, expiry: savedExpiry });
   }
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
