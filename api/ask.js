@@ -12,22 +12,21 @@ export default async function handler(req, res) {
 
   async function kvGet(key) {
     try {
-      const r = await fetch(`${KV_URL}/get/${encodeURIComponent(key)}`, {
-        method: 'GET',
+      const r = await fetch(`${KV_URL}/get/${key}`, {
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
       const d = await r.json();
-      return d.result || null;
+      return d.result;
     } catch(e) { return null; }
   }
 
   async function kvSet(key, value) {
     try {
-      await fetch(`${KV_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-        method: 'GET',
+      const r = await fetch(`${KV_URL}/set/${key}/${encodeURIComponent(value)}`, {
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
-    } catch(e) {}
+      return await r.json();
+    } catch(e) { return null; }
   }
 
   const VIP_CODES = new Set(['AH80','AH23','SKY77','GEM55']);
@@ -41,47 +40,44 @@ export default async function handler(req, res) {
 
   if (action === 'verify') {
     const type = getCodeType(code);
-    console.log('Code:', code, 'Type:', type, 'DeviceId:', deviceId);
     if (!type) {
-      console.log('Invalid code - not found');
       return res.status(200).json({ valid: false, reason: 'invalid' });
     }
 
-    try {
-      const savedData = await kvGet('code_' + code);
+    const savedData = await kvGet('code_' + code);
+    console.log('KV savedData for', code, ':', savedData);
 
-      if (!savedData) {
-        const now = Date.now();
-        let expiry = 0;
-        if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
-        if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
-        const dataToSave = deviceId + '|' + expiry + '|' + type;
-        await kvSet('code_' + code, dataToSave);
-        return res.status(200).json({ valid: true, type, expiry });
-      }
+    if (!savedData) {
+      const now = Date.now();
+      let expiry = 0;
+      if (type === 'monthly') expiry = now + (30 * 24 * 60 * 60 * 1000);
+      if (type === 'yearly') expiry = now + (365 * 24 * 60 * 60 * 1000);
+      const dataToSave = deviceId + '|' + expiry + '|' + type;
+      const setResult = await kvSet('code_' + code, dataToSave);
+      console.log('KV set result:', JSON.stringify(setResult));
+      return res.status(200).json({ valid: true, type, expiry });
+    }
 
-      const parts = savedData.split('|');
-      if (parts.length < 3) {
-        return res.status(200).json({ valid: true, type, expiry: 0 });
-      }
-
-      const savedDevice = parts[0];
-      const savedExpiry = parseInt(parts[1]);
-      const savedType = parts[2];
-
-      if (savedDevice !== deviceId) {
-        return res.status(200).json({ valid: false, reason: 'device' });
-      }
-
-      if (savedExpiry !== 0 && Date.now() > savedExpiry) {
-        return res.status(200).json({ valid: false, reason: 'expired' });
-      }
-
-      return res.status(200).json({ valid: true, type: savedType, expiry: savedExpiry });
-
-    } catch(e) {
+    const parts = String(savedData).split('|');
+    if (parts.length < 2) {
       return res.status(200).json({ valid: true, type, expiry: 0 });
     }
+
+    const savedDevice = parts[0];
+    const savedExpiry = parseInt(parts[1]) || 0;
+    const savedType = parts[2] || type;
+
+    console.log('savedDevice:', savedDevice, 'deviceId:', deviceId);
+
+    if (savedDevice !== deviceId) {
+      return res.status(200).json({ valid: false, reason: 'device' });
+    }
+
+    if (savedExpiry !== 0 && Date.now() > savedExpiry) {
+      return res.status(200).json({ valid: false, reason: 'expired' });
+    }
+
+    return res.status(200).json({ valid: true, type: savedType, expiry: savedExpiry });
   }
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
