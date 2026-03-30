@@ -43,15 +43,15 @@ export default async function handler(req, res) {
 
   const VIP_CODES = new Set(['AH80','AH23','SKY77','GEM55','ADEL23']);
 
-  function getCodeType(code) {
+  async function getCodeType(code) {
     if (VIP_CODES.has(code)) return 'vip';
-    if (code.startsWith('M')) return 'monthly';
-    if (code.startsWith('Y')) return 'yearly';
-    return null;
+    const stored = await kvGet('valid_' + code);
+    if (!stored) return null;
+    return stored;
   }
 
   if (action === 'verify') {
-    const type = getCodeType(code);
+    const type = await getCodeType(code);
     if (!type) {
       return res.status(200).json({ valid: false, reason: 'invalid' });
     }
