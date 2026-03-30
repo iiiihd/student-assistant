@@ -17,7 +17,7 @@
 body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 
 /* Login */
-#loginScreen { position:fixed; inset:0; background:linear-gradient(135deg,#1E40AF,#7C3AED); display:flex; align-items:center; justify-content:center; z-index:999; padding:20px; }
+#loginScreen { position:fixed; inset:0; background:linear-gradient(135deg,#EA580C,#2563EB,#F97316); display:flex; align-items:center; justify-content:center; z-index:999; padding:20px; }
 .login-card { background:var(--surface); border-radius:24px; padding:28px 22px; width:100%; max-width:380px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
 .login-logo { font-size:44px; margin-bottom:12px; }
 .login-card h1 { font-size:19px; font-weight:700; margin-bottom:6px; color:var(--text); }
@@ -51,8 +51,10 @@ body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); colo
 
 .login-input { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:11px 16px; font-size:14px; font-family:inherit; outline:none; text-align:center; letter-spacing:3px; color:var(--text); background:var(--bg); margin-bottom:10px; transition:border-color .2s; }
 .login-input:focus { border-color:var(--primary); }
-.login-btn { width:100%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; border:none; border-radius:12px; padding:12px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; }
+.login-btn { width:100%; background:linear-gradient(135deg,#EA580C,#2563EB); color:#fff; border:none; border-radius:12px; padding:12px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; }
 .error-msg { color:var(--danger); font-size:12px; margin-top:8px; display:none; }
+.tg-btn { display:block; background:#2AABEE; color:white; border-radius:12px; padding:12px; font-size:13px; font-weight:700; text-decoration:none; margin-bottom:14px; text-align:center; transition:transform .15s; }
+.tg-btn:hover { transform:scale(1.02); }
 .contact-info { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); line-height:1.7; }
 
 /* App */
@@ -165,6 +167,10 @@ textarea::placeholder { color:var(--light); }
       </a>
     </div>
 
+    <a href="https://t.me/StudentHelperAH_bot" target="_blank" class="tg-btn">
+      ✈️ اشترك عبر تيليقرام واحصل على كودك تلقائياً
+    </a>
+
     <div class="divider">لديك كود دخول؟</div>
 
     <input type="text" id="codeInput" class="login-input" placeholder="أدخل كود الدخول" maxlength="8">
@@ -172,7 +178,7 @@ textarea::placeholder { color:var(--light); }
     <p class="error-msg" id="errorMsg">❌ كود غير صحيح، تأكد وحاول مرة أخرى</p>
 
     <div class="contact-info">
-      بعد الدفع أرسل لنا إيصال الدفع على واتساب وسنرسل لك الكود فوراً
+      بعد الدفع ارجع لتيليقرام وسيصلك كودك تلقائياً ✅
     </div>
   </div>
 </div>
