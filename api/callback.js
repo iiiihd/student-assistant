@@ -46,14 +46,14 @@ export default async function handler(req, res) {
   if (data.startsWith('monthly_')) {
     await kvSet('pending_' + chatId, 'monthly');
     await sendMsg(chatId,
-      `📅 <b>اشتراك شهري</b>\n\n1️⃣ اضغط على زر الدفع أدناه\n2️⃣ أكمل الدفع على PayPal\n3️⃣ ارجع هنا وسيصلك الكود تلقائياً ✅`,
-      [[{ text: '💳 ادفع الآن', url: MONTHLY_LINK + '?custom=' + chatId }]]
+      `📅 <b>اشتراك شهري</b>\n\n✅ يقبل: فيزا، ماستركارد، PayPal\n\n1️⃣ اضغط زر الدفع\n2️⃣ أكمل الدفع\n3️⃣ سيصلك الكود هنا تلقائياً ✅`,
+      [[{ text: '💳 ادفع بفيزا / ماستركارد / PayPal', url: MONTHLY_LINK + '?custom=' + chatId }]]
     );
   } else if (data.startsWith('yearly_')) {
     await kvSet('pending_' + chatId, 'yearly');
     await sendMsg(chatId,
-      `⭐ <b>اشتراك سنوي - الأوفر!</b>\n\n1️⃣ اضغط على زر الدفع أدناه\n2️⃣ أكمل الدفع على PayPal\n3️⃣ ارجع هنا وسيصلك الكود تلقائياً ✅`,
-      [[{ text: '💳 ادفع الآن', url: YEARLY_LINK + '?custom=' + chatId }]]
+      `⭐ <b>اشتراك سنوي - الأوفر!</b>\n\n✅ يقبل: فيزا، ماستركارد، PayPal\n\n1️⃣ اضغط زر الدفع\n2️⃣ أكمل الدفع\n3️⃣ سيصلك الكود هنا تلقائياً ✅`,
+      [[{ text: '💳 ادفع بفيزا / ماستركارد / PayPal', url: YEARLY_LINK + '?custom=' + chatId }]]
     );
   }
 
