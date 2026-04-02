@@ -295,6 +295,7 @@ let mode = 'quick';
 let loading = false;
 let currentImage = null;
 let currentPDF = null;
+let chatHistory = [];
 
 function handleImage(event) {
   const file = event.target.files[0];
@@ -571,7 +572,7 @@ async function send() {
   showLoading();
 
   try {
-    const body = { instruction: modeInstruction };
+    const body = { instruction: modeInstruction, history: chatHistory.slice(-10) };
     if (imgToSend) {
       body.image = imgToSend.split(',')[1];
       body.question = sub + (q || 'اشرح ما تراه في هذه الصورة بالتفصيل');
@@ -594,6 +595,9 @@ async function send() {
     } else {
       let text = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/###\s*(.*?)<br>/g, '<b>$1</b><br>');
       addMsg('bot', text + '<br><br><span class="badge">' + modeLabel + '</span>');
+      chatHistory.push({ role: 'user', content: body.question });
+      chatHistory.push({ role: 'assistant', content: data.answer });
+      if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
     }
   } catch (e) {
     removeLoader();
