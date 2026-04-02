@@ -68,7 +68,17 @@ body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); colo
 .tg-btn { display:block; background:#2AABEE; color:white; border-radius:12px; padding:12px; font-size:13px; font-weight:700; text-decoration:none; margin-bottom:14px; text-align:center; transition:transform .15s; }
 .tg-btn:hover { transform:scale(1.02); }
 .contact-info { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); line-height:1.7; }
-.sidebar { position:fixed; top:0; right:0; width:260px; height:100vh; background:var(--surface); border-left:1px solid var(--border); z-index:900; transform:translateX(100%); transition:transform .3s ease; display:flex; flex-direction:column; }
+.msg-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.action-btn { padding:4px 10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--muted); font-size:11px; cursor:pointer; font-family:inherit; transition:all .2s; }
+.action-btn:hover { background:var(--primary-light); color:var(--primary-dark); border-color:var(--primary); }
+.share-modal { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-radius:20px 20px 0 0; padding:20px; z-index:1000; border-top:1px solid var(--border); transform:translateY(100%); transition:transform .3s; }
+.share-modal.show { transform:translateY(0); }
+.share-modal h3 { font-size:14px; font-weight:700; margin-bottom:14px; text-align:center; }
+.share-btns { display:flex; flex-direction:column; gap:8px; }
+.share-option { padding:12px; border-radius:12px; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; }
+.summary-btn { position:fixed; bottom:160px; left:16px; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; border:none; border-radius:12px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; z-index:100; display:none; }
+.search-bar { padding:8px 12px; border-bottom:1px solid var(--border); display:none; }
+.search-bar input { width:100%; border:1px solid var(--border); border-radius:8px; padding:7px 12px; font-size:12px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); } width:260px; height:100vh; background:var(--surface); border-left:1px solid var(--border); z-index:900; transform:translateX(100%); transition:transform .3s ease; display:flex; flex-direction:column; }
 .sidebar.open { transform:translateX(0); }
 .sidebar-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
 .sidebar-header h3 { font-size:14px; font-weight:700; color:var(--text); }
@@ -204,10 +214,25 @@ textarea::placeholder { color:var(--light); }
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
+<div id="shareModal" class="share-modal">
+  <h3>📤 شارك الجواب</h3>
+  <div class="share-btns">
+    <button class="share-option" style="background:#25D366;color:white;" onclick="shareToWhatsapp()">📱 واتساب</button>
+    <button class="share-option" style="background:#2AABEE;color:white;" onclick="shareToTelegram()">✈️ تيليقرام</button>
+    <button class="share-option" style="background:var(--bg);color:var(--text);border:1px solid var(--border);" onclick="copyShareText()">📋 نسخ النص</button>
+    <button class="share-option" style="background:var(--bg);color:var(--muted);border:1px solid var(--border);" onclick="closeShareModal()">إلغاء</button>
+  </div>
+</div>
+
+<button class="summary-btn" id="summaryBtn" onclick="showDailySummary()">📊 ملخص اليوم</button>
+
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <h3>المحادثات</h3>
     <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <div class="search-bar" id="searchBar" style="display:block;">
+    <input type="text" placeholder="🔍 ابحث في المحادثات..." oninput="searchChats(this.value)">
   </div>
   <button class="sidebar-new" onclick="newChat()">+ محادثة جديدة</button>
   <div class="sidebar-list" id="sidebarList">
@@ -382,6 +407,96 @@ function removeAttachment() {
   document.getElementById('inp').placeholder = 'اكتب سؤالك هنا...';
 }
 
+let currentShareText = '';
+let dailyTopics = [];
+
+function copyAnswer(msgId) {
+  const el = document.getElementById(msgId);
+  if (!el) return;
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('✅ تم نسخ الجواب!');
+  });
+}
+
+function shareAnswer(msgId) {
+  const el = document.getElementById(msgId);
+  if (!el) return;
+  currentShareText = el.innerText + '\n\n— شاركه مساعد الطلاب الذكي 🎓\nstudent-assistant-seven.vercel.app';
+  document.getElementById('shareModal').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function shareToWhatsapp() {
+  const url = 'https://wa.me/?text=' + encodeURIComponent(currentShareText);
+  window.open(url, '_blank');
+  closeShareModal();
+}
+
+function shareToTelegram() {
+  const url = 'https://t.me/share/url?url=student-assistant-seven.vercel.app&text=' + encodeURIComponent(currentShareText);
+  window.open(url, '_blank');
+  closeShareModal();
+}
+
+function copyShareText() {
+  navigator.clipboard.writeText(currentShareText).then(() => {
+    alert('✅ تم النسخ!');
+    closeShareModal();
+  });
+}
+
+function rateAnswer(msgId, rating) {
+  const ratings = JSON.parse(localStorage.getItem('ratings') || '{"good":0,"bad":0}');
+  if (rating === 1) { ratings.good++; alert('شكراً على تقييمك! 😊'); }
+  else { ratings.bad++; alert('شكراً! سنحاول التحسين 🙏'); }
+  localStorage.setItem('ratings', JSON.stringify(ratings));
+}
+
+function reportAnswer(msgId) {
+  const el = document.getElementById(msgId);
+  if (!el) return;
+  const reports = JSON.parse(localStorage.getItem('reports') || '[]');
+  reports.push({ text: el.innerText.substring(0, 100), time: new Date().toISOString() });
+  localStorage.setItem('reports', JSON.stringify(reports));
+  alert('✅ تم الإبلاغ عن الخطأ، شكراً!');
+}
+
+function updateDailySummary(question, answer) {
+  dailyTopics.push({ q: question.substring(0, 60), a: answer.substring(0, 100) });
+  if (dailyTopics.length >= 2) {
+    document.getElementById('summaryBtn').style.display = 'block';
+  }
+}
+
+function showDailySummary() {
+  if (dailyTopics.length === 0) { alert('لا يوجد محتوى بعد!'); return; }
+  let summary = '📊 ملخص ما تعلمته اليوم:\n\n';
+  dailyTopics.forEach((t, i) => { summary += (i+1) + '. ' + t.q + '\n'; });
+  alert(summary);
+}
+
+function searchChats(query) {
+  const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  const list = document.getElementById('sidebarList');
+  const filtered = query ? savedChats.filter(c => c.title.includes(query)) : savedChats;
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="sidebar-empty">لا توجد نتائج</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(c =>
+    `<div class="sidebar-item" style="display:flex;align-items:center;justify-content:space-between;gap:6px;" onclick="loadChat('${c.id}')">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">💬 ${c.title}...</span>
+      <button onclick="deleteChat('${c.id}', event)" style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:14px;flex-shrink:0;padding:0 2px;">✕</button>
+    </div>`
+  ).join('');
+}
+
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('overlay').classList.add('show');
@@ -390,6 +505,7 @@ function openSidebar() {
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
+  closeShareModal();
 }
 
 function newChat() {
@@ -718,11 +834,21 @@ async function send() {
     if (data.error) {
       addMsg('bot', 'خطأ: ' + data.error);
     } else {
+      const msgId = 'msg_' + Date.now();
       let text = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/###\s*(.*?)<br>/g, '<b>$1</b><br>');
-      addMsg('bot', text + '<br><br><span class="badge">' + modeLabel + '</span>');
+      const actions = `
+        <div class="msg-actions">
+          <button class="action-btn" onclick="copyAnswer('${msgId}')">📋 نسخ</button>
+          <button class="action-btn" onclick="shareAnswer('${msgId}')">📤 شارك</button>
+          <button class="action-btn rate-btn" onclick="rateAnswer('${msgId}', 1)">👍</button>
+          <button class="action-btn rate-btn" onclick="rateAnswer('${msgId}', 0)">👎</button>
+          <button class="action-btn" onclick="reportAnswer('${msgId}')">⚠️ خطأ</button>
+        </div>`;
+      const div = addMsg('bot', `<span id="${msgId}">${text}</span><br><br><span class="badge">${modeLabel}</span>${actions}`);
       chatHistory.push({ role: 'user', content: body.question });
       chatHistory.push({ role: 'assistant', content: data.answer });
       if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+      updateDailySummary(body.question, data.answer);
     }
   } catch (e) {
     removeLoader();
