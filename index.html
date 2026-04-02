@@ -68,9 +68,11 @@ body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); colo
 .tg-btn { display:block; background:#2AABEE; color:white; border-radius:12px; padding:12px; font-size:13px; font-weight:700; text-decoration:none; margin-bottom:14px; text-align:center; transition:transform .15s; }
 .tg-btn:hover { transform:scale(1.02); }
 .contact-info { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); line-height:1.7; }
-.msg-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
-.action-btn { padding:4px 10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--muted); font-size:11px; cursor:pointer; font-family:inherit; transition:all .2s; }
-.action-btn:hover { background:var(--primary-light); color:var(--primary-dark); border-color:var(--primary); }
+.msg-actions { display:flex; gap:6px; margin-top:10px; align-items:center; flex-wrap:wrap; }
+.action-btn { padding:5px 12px; border-radius:20px; border:1.5px solid var(--primary); background:var(--primary-light); color:var(--primary-dark); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px; }
+.rate-btn { width:32px; height:32px; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.rate-btn.good { border-color:var(--success); background:var(--success-light); color:var(--success); }
+.rate-btn.bad { border-color:var(--danger); background:#FEF2F2; color:var(--danger); }
 .share-modal { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-radius:20px 20px 0 0; padding:20px; z-index:1000; border-top:1px solid var(--border); transform:translateY(100%); transition:transform .3s; }
 .share-modal.show { transform:translateY(0); }
 .share-modal h3 { font-size:14px; font-weight:700; margin-bottom:14px; text-align:center; }
@@ -144,14 +146,14 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 
 footer { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:8px 14px 14px; }
 .mode-row { display:flex; gap:8px; margin-bottom:8px; }
-.mode-btn { flex:1; padding:8px; border-radius:10px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; border:1.5px solid var(--border); background:transparent; color:var(--muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:5px; }
+.mode-btn { flex:1; padding:10px; border-radius:12px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; border:2px solid var(--border); background:var(--bg); color:var(--muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px; }
 .mode-btn.active { border-color:var(--primary); background:var(--primary-light); color:var(--primary-dark); }
-.mode-btn.active.detailed { border-color:var(--accent); background:#F5F3FF; color:var(--accent); }
-.attach-row { display:flex; gap:7px; margin-bottom:8px; }
-.attach-btn { flex:1; padding:8px 10px; border-radius:11px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; border:1.5px solid var(--border); background:transparent; color:var(--muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.mode-btn.active.detailed { border-color:#EA580C; background:#FFF7ED; color:#9A3412; }
+.attach-row { display:flex; gap:8px; margin-bottom:8px; }
+.attach-btn { flex:1; padding:10px; border-radius:12px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; border:1.5px solid var(--border); background:var(--bg); color:var(--muted); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px; }
 .attach-btn:hover { background:var(--bg); }
 .attach-btn.img-active { border-color:#7C3AED; background:#F5F3FF; color:#7C3AED; }
-.attach-btn.pdf-active { border-color:#DC2626; background:#FEF2F2; color:#DC2626; }
+.attach-btn.pdf-active { border-color:var(--success); background:var(--success-light); color:#065F46; }
 .input-row { display:flex; gap:7px; align-items:flex-end; }
 textarea { flex:1; border:1.5px solid var(--border); border-radius:13px; padding:10px 13px; font-size:13px; font-family:inherit; resize:none; min-height:44px; max-height:110px; outline:none; transition:border-color .2s; color:var(--text); background:var(--bg); line-height:1.5; }
 textarea:focus { border-color:var(--primary); }
@@ -183,23 +185,10 @@ textarea::placeholder { color:var(--light); }
       <div style="font-size:11px;opacity:0.8;">لكل شهر — يمكنك الإلغاء في أي وقت</div>
     </div>
 
-    <p class="pay-label">اختر طريقة الدفع</p>
-    <div class="pay-btns">
-      <a id="payBtn" href="https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ" target="_blank" class="pay-method-btn paypal-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M20.067 8.478c.492.315.844.825.983 1.39.357 1.476-.316 3.297-1.459 4.124-.96.69-2.173.996-3.654.996h-.081c-.499 0-.94.345-1.033.835l-.596 3.368-.141.797c-.051.293-.307.51-.605.51H11.06c-.425 0-.732-.393-.657-.811l.03-.161.585-3.7.037-.204c.073-.418.434-.724.857-.724h.54c3.498 0 6.235-1.42 7.036-5.527.333-1.702.161-3.123-.421-4.12a2.9 2.9 0 00-.83-.773c.607.345 1.104.857 1.43 1.5z"/><path d="M18.624 6.979c-.168-.045-.34-.084-.517-.117-.643-.117-1.347-.173-2.1-.173H10.63c-.157 0-.307.034-.44.096-.293.135-.512.41-.563.747l-1.19 7.536-.034.218c.093-.59.597-1.027 1.192-1.027h2.485c4.875 0 8.693-1.982 9.808-7.712.033-.17.062-.335.086-.498-.283-.148-.58-.276-.895-.377-.154-.049-.31-.094-.47-.133l-.485-.56z"/><path d="M9.627 7.532a.975.975 0 01.563-.747.983.983 0 01.44-.096h5.377c.753 0 1.457.057 2.1.173.177.033.35.072.517.117l.485.56c.16.039.316.084.47.133.315.101.612.229.895.377-.024.163-.053.328-.086.498-1.115 5.73-4.933 7.712-9.808 7.712H7.595c-.595 0-1.099.437-1.192 1.027L5.2 22.79c-.075.418.232.811.657.811h2.922a.872.872 0 00.861-.734l.035-.185.596-3.368.038-.207a.872.872 0 01.861-.734h.544c3.517 0 6.269-1.424 7.074-5.544.335-1.717.162-3.15-.435-4.155a3.594 3.594 0 00-1.097-1.142h-.001z"/></svg>
-        PayPal
-      </a>
-      <a id="appleBtn" href="https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ" target="_blank" class="pay-method-btn apple-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="flex-shrink:0"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-        Apple Pay
-      </a>
-      <a id="cardBtn" href="https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ" target="_blank" class="pay-method-btn card-btn">
-        💳 بطاقة بنكية
-      </a>
-    </div>
+    <p class="pay-label">اشترك عبر تيليقرام واحصل على كودك تلقائياً</p>
 
     <a href="https://t.me/StudentHelperAH_bot" target="_blank" class="tg-btn">
-      ✈️ اشترك عبر تيليقرام واحصل على كودك تلقائياً
+      ✈️ اشترك عبر تيليقرام
     </a>
 
     <div class="divider">لديك كود دخول؟</div>
@@ -271,17 +260,25 @@ textarea::placeholder { color:var(--light); }
 
 <footer>
   <div class="mode-row">
-    <button class="mode-btn active" id="quickBtn" onclick="setMode('quick')">⚡ جواب سريع</button>
-    <button class="mode-btn" id="detailBtn" onclick="setMode('detailed')">📖 شرح مفصل</button>
+    <button class="mode-btn active" id="quickBtn" onclick="setMode('quick')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      جواب سريع
+    </button>
+    <button class="mode-btn" id="detailBtn" onclick="setMode('detailed')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      شرح مفصل
+    </button>
   </div>
   <div class="attach-row">
     <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(event)">
     <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handlePDF(event)">
     <button class="attach-btn" id="imgBtn" onclick="document.getElementById('imgInput').click()">
-      🖼️ رفع صورة
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      رفع صورة
     </button>
     <button class="attach-btn" id="pdfBtn" onclick="document.getElementById('pdfInput').click()">
-      📄 رفع PDF
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      رفع PDF
     </button>
   </div>
   <div class="preview-box" id="previewBox">
@@ -841,9 +838,12 @@ async function send() {
       let text = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/###\s*(.*?)<br>/g, '<b>$1</b><br>');
       const actions = `
         <div class="msg-actions">
-          <button class="action-btn" onclick="shareAnswer('${msgId}')">📤 شارك</button>
-          <button class="action-btn rate-btn" onclick="rateAnswer('${msgId}', 1)">👍</button>
-          <button class="action-btn rate-btn" onclick="rateAnswer('${msgId}', 0)">👎</button>
+          <button class="action-btn" onclick="shareAnswer('${msgId}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            شارك
+          </button>
+          <button class="action-btn rate-btn good" onclick="rateAnswer('${msgId}', 1)">👍</button>
+          <button class="action-btn rate-btn bad" onclick="rateAnswer('${msgId}', 0)">👎</button>
         </div>`;
       const div = addMsg('bot', `<span id="${msgId}">${text}</span><br><br><span class="badge">${modeLabel}</span>${actions}`);
       chatHistory.push({ role: 'user', content: body.question });
