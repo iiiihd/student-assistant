@@ -47,6 +47,7 @@ export default async function handler(req, res) {
     if (VIP_CODES.has(code)) return 'vip';
     const stored = await kvGet('valid_' + code);
     if (!stored) return null;
+    if (stored === 'yearly') return null;
     return stored;
   }
 
