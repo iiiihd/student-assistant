@@ -430,6 +430,16 @@ function loadChat(chatId) {
   closeSidebar();
 }
 
+function deleteChat(chatId, e) {
+  e.stopPropagation();
+  if (!confirm('هل تريد حذف هذه المحادثة؟')) return;
+  const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  const updated = savedChats.filter(c => c.id !== chatId);
+  localStorage.setItem('savedChats', JSON.stringify(updated));
+  localStorage.removeItem(chatId);
+  updateSidebarList();
+}
+
 function updateSidebarList() {
   const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
   const list = document.getElementById('sidebarList');
@@ -438,7 +448,10 @@ function updateSidebarList() {
     return;
   }
   list.innerHTML = savedChats.map((c, i) => 
-    `<div class="sidebar-item" onclick="loadChat('${c.id}')">💬 ${c.title}...</div>`
+    `<div class="sidebar-item" style="display:flex;align-items:center;justify-content:space-between;gap:6px;" onclick="loadChat('${c.id}')">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">💬 ${c.title}...</span>
+      <button onclick="deleteChat('${c.id}', event)" style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:14px;flex-shrink:0;padding:0 2px;">✕</button>
+    </div>`
   ).join('');
 }
 
