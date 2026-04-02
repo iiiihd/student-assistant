@@ -91,6 +91,16 @@ export default async function handler(req, res) {
 
   if (!question && !image && !pdf) return res.status(400).json({ error: 'No input provided' });
 
+  if (deviceId) {
+    const today = new Date().toISOString().split('T')[0];
+    const countKey = 'count_' + deviceId + '_' + today;
+    const count = parseInt(await kvGet(countKey) || '0');
+    if (count > 50) {
+      await new Promise(r => setTimeout(r, 10000));
+    }
+    await kvSet(countKey, String(count + 1), 86400);
+  }
+
   const API_KEY = process.env.OPENAI_API_KEY;
   const systemPrompt = 'أنت مساعد تعليمي ذكي للطلاب. ' + (instruction || 'اشرح بوضوح وسهولة باللغة العربية.');
 
