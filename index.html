@@ -841,11 +841,9 @@ async function send() {
       let text = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/###\s*(.*?)<br>/g, '<b>$1</b><br>');
       const actions = `
         <div class="msg-actions">
-          <button class="action-btn" onclick="copyAnswer('${msgId}')">📋 نسخ</button>
           <button class="action-btn" onclick="shareAnswer('${msgId}')">📤 شارك</button>
           <button class="action-btn rate-btn" onclick="rateAnswer('${msgId}', 1)">👍</button>
           <button class="action-btn rate-btn" onclick="rateAnswer('${msgId}', 0)">👎</button>
-          <button class="action-btn" onclick="reportAnswer('${msgId}')">⚠️ خطأ</button>
         </div>`;
       const div = addMsg('bot', `<span id="${msgId}">${text}</span><br><br><span class="badge">${modeLabel}</span>${actions}`);
       chatHistory.push({ role: 'user', content: body.question });
