@@ -14,6 +14,18 @@
   --border:#E2E8F0; --success:#059669; --success-light:#ECFDF5;
   --danger:#DC2626; --gold:#F59E0B;
 }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary:#3B82F6; --primary-light:#1E3A5F; --primary-dark:#93C5FD;
+    --accent:#A78BFA; --bg:#0F172A; --surface:#1E293B;
+    --text:#F1F5F9; --muted:#94A3B8; --light:#475569;
+    --border:#334155; --success:#34D399; --success-light:#0C2A1A;
+    --danger:#F87171; --gold:#FCD34D;
+  }
+  #loginScreen { background:linear-gradient(135deg,#7C2D12,#1E3A5F,#92400E) !important; }
+  .login-card { box-shadow:0 20px 60px rgba(0,0,0,0.6) !important; }
+  .bubble { box-shadow:none !important; }
+}
 body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 
 /* Login */
@@ -319,13 +331,17 @@ function handleImage(event) {
 function handlePDF(event) {
   const file = event.target.files[0];
   if (!file) return;
+  if (file.size > 20 * 1024 * 1024) {
+    alert('حجم الملف كبير جداً — الحد الأقصى 20MB');
+    return;
+  }
   currentImage = null;
   const reader = new FileReader();
   reader.onload = function(e) {
     currentPDF = e.target.result.split(',')[1];
     document.getElementById('previewImg').style.display = 'none';
     document.getElementById('previewName').textContent = file.name;
-    document.getElementById('previewType').textContent = 'PDF — سيتم تلخيصه وشرحه';
+    document.getElementById('previewType').textContent = 'PDF — سيتم تلخيصه وشرحه (' + (file.size / 1024).toFixed(0) + ' KB)';
     document.getElementById('previewBox').classList.add('show');
     document.getElementById('pdfBtn').classList.add('pdf-active');
     document.getElementById('imgBtn').classList.remove('img-active');
@@ -572,7 +588,7 @@ async function send() {
   showLoading();
 
   try {
-    const body = { instruction: modeInstruction, history: chatHistory.slice(-10) };
+    const body = { instruction: modeInstruction, history: chatHistory.slice(-10), deviceId: getDeviceId() };
     if (imgToSend) {
       body.image = imgToSend.split(',')[1];
       body.question = sub + (q || 'اشرح ما تراه في هذه الصورة بالتفصيل');
