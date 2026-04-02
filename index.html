@@ -402,15 +402,31 @@ function closeSidebar() {
 function newChat() {
   if (chatHistory.length > 0) {
     const firstMsg = chatHistory[0]?.content?.substring(0, 40) || 'محادثة جديدة';
+    const chatMessages = document.getElementById('chat').innerHTML;
     const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
-    savedChats.unshift({ title: firstMsg, time: Date.now() });
+    const chatId = 'chat_' + Date.now();
+    savedChats.unshift({ id: chatId, title: firstMsg, time: Date.now() });
     if (savedChats.length > 20) savedChats.pop();
     localStorage.setItem('savedChats', JSON.stringify(savedChats));
+    localStorage.setItem(chatId, JSON.stringify({ history: chatHistory, html: chatMessages }));
     updateSidebarList();
   }
   chatHistory = [];
   document.getElementById('chat').innerHTML = '';
   showWelcome('الكل', '🌟');
+  closeSidebar();
+}
+
+function loadChat(chatId) {
+  const saved = localStorage.getItem(chatId);
+  if (!saved) return;
+  const data = JSON.parse(saved);
+  chatHistory = data.history || [];
+  const chatEl = document.getElementById('chat');
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+  chatEl.innerHTML = data.html || '';
+  chatEl.scrollTop = chatEl.scrollHeight;
   closeSidebar();
 }
 
@@ -422,7 +438,7 @@ function updateSidebarList() {
     return;
   }
   list.innerHTML = savedChats.map((c, i) => 
-    `<div class="sidebar-item" onclick="closeSidebar()">💬 ${c.title}...</div>`
+    `<div class="sidebar-item" onclick="loadChat('${c.id}')">💬 ${c.title}...</div>`
   ).join('');
 }
 
