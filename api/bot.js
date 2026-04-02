@@ -44,37 +44,14 @@ export default async function handler(req, res) {
     if (text.startsWith('/start')) {
       await kvSet('tg_' + chatId, chatId);
       await sendMsg(chatId,
-        `🎓 <b>أهلاً بك في مساعد الطلاب الذكي!</b>\n\nاختر نوع اشتراكك:`,
-        [
-          [
-            { text: '📅 شهري', callback_data: 'monthly_' + chatId },
-            { text: '⭐ سنوي (الأوفر)', callback_data: 'yearly_' + chatId }
-          ]
-        ]
+        `🎓 <b>أهلاً بك في مساعد الطلاب الذكي!</b>\n\n📚 مساعدك الشخصي لشرح الدروس وحل المسائل وتلخيص PDF\n\n💰 <b>الاشتراك الشهري: $2.99</b>\n\n📩 للاشتراك تواصل معنا مباشرة وسيصلك كودك فوراً:\n@StudentHelperAH_bot\n\n✅ بعد الاشتراك ادخل التطبيق:\nhttps://student-assistant-seven.vercel.app`
       );
     }
   }
 
   if (update.callback_query) {
     const cb = update.callback_query;
-    const chatId = cb.from.id;
-    const data = cb.data || '';
-
     await answerCallback(cb.id);
-
-    if (data.startsWith('monthly_')) {
-      await kvSet('pending_' + chatId, 'monthly');
-      await sendMsg(chatId,
-        `📅 <b>اشتراك شهري</b>\n\n✅ يقبل: فيزا، ماستركارد، PayPal\n\n1️⃣ اضغط زر الدفع\n2️⃣ أكمل الدفع\n3️⃣ سيصلك الكود هنا تلقائياً ✅`,
-        [[{ text: '💳 ادفع بفيزا / ماستركارد / PayPal', url: MONTHLY_LINK + '?custom=' + chatId }]]
-      );
-    } else if (data.startsWith('yearly_')) {
-      await kvSet('pending_' + chatId, 'yearly');
-      await sendMsg(chatId,
-        `⭐ <b>اشتراك سنوي - الأوفر!</b>\n\n✅ يقبل: فيزا، ماستركارد، PayPal\n\n1️⃣ اضغط زر الدفع\n2️⃣ أكمل الدفع\n3️⃣ سيصلك الكود هنا تلقائياً ✅`,
-        [[{ text: '💳 ادفع بفيزا / ماستركارد / PayPal', url: YEARLY_LINK + '?custom=' + chatId }]]
-      );
-    }
   }
 
   res.status(200).end();
