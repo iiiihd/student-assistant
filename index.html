@@ -68,6 +68,19 @@ body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); colo
 .tg-btn { display:block; background:#2AABEE; color:white; border-radius:12px; padding:12px; font-size:13px; font-weight:700; text-decoration:none; margin-bottom:14px; text-align:center; transition:transform .15s; }
 .tg-btn:hover { transform:scale(1.02); }
 .contact-info { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); line-height:1.7; }
+.sidebar { position:fixed; top:0; right:0; width:260px; height:100vh; background:var(--surface); border-left:1px solid var(--border); z-index:900; transform:translateX(100%); transition:transform .3s ease; display:flex; flex-direction:column; }
+.sidebar.open { transform:translateX(0); }
+.sidebar-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.sidebar-header h3 { font-size:14px; font-weight:700; color:var(--text); }
+.sidebar-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:0; }
+.sidebar-new { margin:10px 12px; padding:10px; border-radius:10px; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; width:calc(100% - 24px); }
+.sidebar-list { flex:1; overflow-y:auto; padding:8px 12px; }
+.sidebar-item { padding:10px 12px; border-radius:10px; cursor:pointer; font-size:12px; color:var(--muted); margin-bottom:4px; border:1px solid transparent; transition:all .2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sidebar-item:hover { background:var(--primary-light); color:var(--primary-dark); border-color:var(--border); }
+.sidebar-empty { text-align:center; color:var(--light); font-size:12px; padding:20px; }
+.sidebar-toggle { width:36px; height:36px; border-radius:10px; background:var(--surface); border:1px solid var(--border); color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:899; display:none; }
+.overlay.show { display:block; }
 
 /* App */
 header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; box-shadow:0 1px 8px rgba(0,0,0,0.06); flex-wrap:wrap; }
@@ -185,7 +198,8 @@ textarea::placeholder { color:var(--light); }
 
     <div class="divider">لديك كود دخول؟</div>
 
-    <input type="text" id="codeInput" class="login-input" placeholder="أدخل كود الدخول" maxlength="8">
+    <input type="text" id="nameInput" class="login-input" placeholder="اسمك (اختياري)" maxlength="20" style="margin-bottom:8px; letter-spacing:0;">
+    <input type="text" id="codeInput" class="login-input" placeholder="أدخل كود الدخول" maxlength="10">
     <button class="login-btn" onclick="checkCode()">دخول ←</button>
     <p class="error-msg" id="errorMsg">❌ كود غير صحيح، تأكد وحاول مرة أخرى</p>
 
@@ -195,11 +209,25 @@ textarea::placeholder { color:var(--light); }
   </div>
 </div>
 
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3>المحادثات</h3>
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <button class="sidebar-new" onclick="newChat()">+ محادثة جديدة</button>
+  <div class="sidebar-list" id="sidebarList">
+    <div class="sidebar-empty">لا توجد محادثات سابقة</div>
+  </div>
+</div>
+
 <header>
+  <button class="sidebar-toggle" onclick="openSidebar()">☰</button>
   <div class="logo">🎓</div>
   <div class="header-info">
     <h1>مساعد الطلاب الذكي</h1>
-    <p>مساعدك الذكي لشرح الدروس</p>
+    <p id="welcomeName">مساعدك الذكي لشرح الدروس</p>
   </div>
   <div class="sub-timer">
     <div class="dot"></div>
@@ -361,6 +389,54 @@ function removeAttachment() {
   document.getElementById('inp').placeholder = 'اكتب سؤالك هنا...';
 }
 
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function newChat() {
+  if (chatHistory.length > 0) {
+    const firstMsg = chatHistory[0]?.content?.substring(0, 40) || 'محادثة جديدة';
+    const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+    savedChats.unshift({ title: firstMsg, time: Date.now() });
+    if (savedChats.length > 20) savedChats.pop();
+    localStorage.setItem('savedChats', JSON.stringify(savedChats));
+    updateSidebarList();
+  }
+  chatHistory = [];
+  document.getElementById('chat').innerHTML = '';
+  showWelcome('الكل', '🌟');
+  closeSidebar();
+}
+
+function updateSidebarList() {
+  const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  const list = document.getElementById('sidebarList');
+  if (savedChats.length === 0) {
+    list.innerHTML = '<div class="sidebar-empty">لا توجد محادثات سابقة</div>';
+    return;
+  }
+  list.innerHTML = savedChats.map((c, i) => 
+    `<div class="sidebar-item" onclick="closeSidebar()">💬 ${c.title}...</div>`
+  ).join('');
+}
+
+const BAD_WORDS = ['إباحي', 'جنسي', 'عنف', 'مخدرات', 'قنبلة', 'انتحار', 'اغتصاب'];
+function containsBadContent(text) {
+  return BAD_WORDS.some(w => text.includes(w));
+}
+
+function showWelcomeMessage() {
+  const name = localStorage.getItem('studentName');
+  const nameEl = document.getElementById('welcomeName');
+  if (name && nameEl) nameEl.textContent = 'أهلاً ' + name + '! 👋';
+}
+
 function updateTimer() {
   const expiry = parseInt(localStorage.getItem('codeExpiry') || '0');
   const type = localStorage.getItem('codeType') || 'vip';
@@ -385,14 +461,14 @@ function updateTimer() {
   const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
   const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-  if (days > 7) {
+  if (days > 3) {
     badge.textContent = '✅ ' + days + ' يوم متبقي';
     badge.className = 'timer-badge active';
   } else if (days > 0) {
-    badge.textContent = '⏰ ' + days + ' يوم و' + hours + ' ساعة';
+    badge.textContent = '⏰ تبقى ' + days + ' يوم فقط! جدد اشتراكك';
     badge.className = 'timer-badge warning';
   } else {
-    badge.textContent = '⚠️ ' + hours + ' ساعة متبقية';
+    badge.textContent = '⚠️ ' + hours + ' ساعة متبقية! جدد الآن';
     badge.className = 'timer-badge warning';
   }
 }
@@ -444,12 +520,16 @@ async function checkCode() {
     const data = await res.json();
 
     if (data.valid) {
+      const name = document.getElementById('nameInput')?.value.trim() || '';
+      if (name) localStorage.setItem('studentName', name);
       localStorage.setItem('studentCode', code);
       localStorage.setItem('codeType', data.type || 'vip');
       localStorage.setItem('codeExpiry', data.expiry || '0');
       document.getElementById('loginScreen').style.display = 'none';
+      showWelcomeMessage();
       showWelcome('الكل', '🌟');
       startTimer();
+      updateSidebarList();
     } else if (data.reason === 'device') {
       errorMsg.textContent = '⛔ هذا الكود مرتبط بجهاز آخر، تواصل معنا للمساعدة';
       errorMsg.style.display = 'block';
@@ -476,8 +556,10 @@ function logout() {
 
 if (localStorage.getItem('studentCode')) {
   document.getElementById('loginScreen').style.display = 'none';
+  showWelcomeMessage();
   showWelcome('الكل', '🌟');
   startTimer();
+  updateSidebarList();
 }
 
 document.getElementById('codeInput').addEventListener('keydown', function(e) {
@@ -563,6 +645,11 @@ async function send() {
   const inp = document.getElementById('inp');
   const q = inp.value.trim();
   if (!q && !currentImage && !currentPDF) return;
+  if (q && containsBadContent(q)) {
+    addMsg('bot', '⚠️ عذراً، لا أستطيع الإجابة على هذا النوع من الأسئلة.');
+    inp.value = '';
+    return;
+  }
   inp.value = '';
   inp.style.height = 'auto';
   loading = true;
