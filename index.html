@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>مساعد الطلاب الذكي</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -94,7 +94,7 @@ body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg); colo
 .overlay.show { display:block; }
 
 /* App */
-header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 12px; display:flex; align-items:center; gap:8px; flex-shrink:0; box-shadow:0 1px 8px rgba(0,0,0,0.06); }
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 12px; padding-top:max(10px, env(safe-area-inset-top)); display:flex; align-items:center; gap:8px; flex-shrink:0; box-shadow:0 1px 8px rgba(0,0,0,0.06); }
 .logo { width:36px; height:36px; min-width:36px; background:linear-gradient(135deg,var(--primary),var(--accent)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
 .header-info { flex:1; min-width:0; overflow:hidden; }
 .header-info h1 { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -108,8 +108,9 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .timer-badge.warning { background:#FEF2F2; color:#DC2626; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-.subjects { background:var(--surface); padding:8px 12px; border-bottom:1px solid var(--border); display:flex; gap:6px; overflow-x:auto; flex-shrink:0; scrollbar-width:none; }
+.subjects { background:var(--surface); padding:8px 12px; border-bottom:1px solid var(--border); display:flex; gap:6px; overflow-x:auto; flex-shrink:0; scrollbar-width:none; -webkit-overflow-scrolling:touch; white-space:nowrap; }
 .subjects::-webkit-scrollbar { display:none; }
+.chip { flex-shrink:0; }
 .chip { flex-shrink:0; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:500; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-family:inherit; transition:all .2s; white-space:nowrap; }
 .chip.active,.chip:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
 
