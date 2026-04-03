@@ -99,7 +99,7 @@ export default async function handler(req, res) {
           }
         }
       } else {
-        await sendMsg(chatId, `📝 أرسل كودك هكذا:\n<code>/check كودك</code>`);
+        await sendMsg(chatId, `📝 أرسل كودك هكذا:\n<code>/check كودك</code>\n\nمثال: <code>/check M03QRE</code>`);
       }
     } else if (chatId.toString() !== ADMIN_CHAT_ID && !text.startsWith('/')) {
       await sendMsg(ADMIN_CHAT_ID,
