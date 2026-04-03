@@ -80,18 +80,23 @@ export default async function handler(req, res) {
       const parts = text.split(' ');
       const code = parts[1]?.toUpperCase();
       if (code) {
-        const expiry = await kvGet('exp_' + code);
-        if (expiry) {
-          const days = Math.floor((parseInt(expiry) - Date.now()) / (1000 * 60 * 60 * 24));
-          if (days > 0) {
-            await sendMsg(chatId, `✅ <b>الكود: ${code}</b>\n\n⏰ متبقي: <b>${days} يوم</b>`);
-          } else {
-            await sendMsg(chatId, `⚠️ <b>الكود: ${code}</b>\n\nانتهى اشتراكك. جدد الآن!`,
-              [[{ text: '💳 جدد اشتراكك', callback_data: 'subscribe' }]]
-            );
-          }
+        const VIP_CODES = new Set(['AH80','AH23','SKY77','GEM55','ADEL23']);
+        if (VIP_CODES.has(code)) {
+          await sendMsg(chatId, `⭐ <b>الكود: ${code}</b>\n\n✅ اشتراك دائم — لا ينتهي أبداً!`);
         } else {
-          await sendMsg(chatId, `❌ الكود غير موجود أو غير صحيح.`);
+          const expiry = await kvGet('exp_' + code);
+          if (expiry) {
+            const days = Math.floor((parseInt(expiry) - Date.now()) / (1000 * 60 * 60 * 24));
+            if (days > 0) {
+              await sendMsg(chatId, `✅ <b>الكود: ${code}</b>\n\n⏰ متبقي: <b>${days} يوم</b>`);
+            } else {
+              await sendMsg(chatId, `⚠️ <b>الكود: ${code}</b>\n\nانتهى اشتراكك. جدد الآن!`,
+                [[{ text: '💳 جدد اشتراكك', callback_data: 'subscribe' }]]
+              );
+            }
+          } else {
+            await sendMsg(chatId, `❌ الكود غير موجود أو غير صحيح.`);
+          }
         }
       } else {
         await sendMsg(chatId, `📝 أرسل كودك هكذا:\n<code>/check كودك</code>`);
