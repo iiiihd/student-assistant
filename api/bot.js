@@ -120,9 +120,10 @@ export default async function handler(req, res) {
     await answerCallback(cb.id);
 
     if (data === 'subscribe') {
+      const lemonLink = `https://student-assistant.lemonsqueezy.com/checkout/buy/c01b1b35-d785-41a0-b52d-e4e7bf51d728?checkout[custom][telegram_chat_id]=${chatId}`;
       await sendMsg(chatId,
-        `💳 <b>الاشتراك الشهري — $2.99</b>\n\n✅ للاشتراك:\n1️⃣ أرسل لنا رسالة هنا\n2️⃣ سنرسل لك رابط الدفع\n3️⃣ بعد الدفع يصلك الكود فوراً ✅\n\n📩 اكتب "أريد الاشتراك" وسنتواصل معك!`,
-        [[{ text: '🔙 رجوع', callback_data: 'main_menu' }]]
+        `💳 <b>الاشتراك الشهري — $2.99</b>\n\n✅ يقبل: فيزا، ماستركارد، Apple Pay\n\n1️⃣ اضغط زر الدفع\n2️⃣ أدخل بريدك الإلكتروني ورقم البطاقة\n3️⃣ سيصلك الكود هنا تلقائياً ✅`,
+        [[{ text: '💳 ادفع الآن $2.99', url: lemonLink }]]
       );
     } else if (data === 'check_sub') {
       await sendMsg(chatId,
