@@ -230,6 +230,14 @@ textarea::placeholder { color:var(--light); }
   <div class="sidebar-list" id="sidebarList">
     <div class="sidebar-empty">لا توجد محادثات سابقة</div>
   </div>
+  <div style="padding:12px;border-top:1px solid var(--border);">
+    <a href="https://student-assistant.lemonsqueezy.com/billing" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary-light);color:var(--primary-dark);border:1.5px solid var(--primary);border-radius:10px;padding:10px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:8px;">
+      ⚙️ إدارة الاشتراك
+    </a>
+    <a href="https://student-assistant.lemonsqueezy.com/checkout/buy/c01b1b35-d785-41a0-b52d-e4e7bf51d728?locale=en" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--success-light);color:var(--success);border:1.5px solid var(--success);border-radius:10px;padding:10px;font-size:12px;font-weight:700;text-decoration:none;">
+      🔄 تجديد الاشتراك
+    </a>
+  </div>
 </div>
 
 <header>
@@ -298,11 +306,6 @@ textarea::placeholder { color:var(--light); }
 </footer>
 
 <script>
-const VALID_CODES = ['TALEB01','TALEB02','TALEB03','TALEB04','TALEB05','TALEB06','TALEB07','TALEB08','TALEB09','TALEB10','TALEB11','TALEB12','TALEB13','TALEB14','TALEB15','TALEB16','TALEB17','TALEB18','TALEB19','TALEB20'];
-
-const YEARLY_LINK = 'https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ';
-const MONTHLY_LINK = 'https://www.paypal.com/ncp/payment/HQMBFGQJAMUZJ';
-
 const QUESTIONS = {
   'الكل': [
     {icon:'🔢', text:'ما هي قاعدة فيثاغورس؟'},
