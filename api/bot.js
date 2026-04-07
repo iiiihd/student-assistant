@@ -120,7 +120,7 @@ export default async function handler(req, res) {
     await answerCallback(cb.id);
 
     if (data === 'subscribe') {
-      const lemonLink = `https://student-assistant.lemonsqueezy.com/checkout/buy/c01b1b35-d785-41a0-b52d-e4e7bf51d728?checkout[custom][telegram_chat_id]=${chatId}`;
+      const lemonLink = `https://student-assistant.lemonsqueezy.com/checkout/buy/c01b1b35-d785-41a0-b52d-e4e7bf51d728?locale=en&checkout[custom][telegram_chat_id]=${chatId}`;
       await sendMsg(chatId,
         `💳 <b>الاشتراك الشهري — $2.99</b>\n\n✅ يقبل: فيزا، ماستركارد، Apple Pay\n\n1️⃣ اضغط زر الدفع\n2️⃣ أدخل بريدك الإلكتروني ورقم البطاقة\n3️⃣ سيصلك الكود هنا تلقائياً ✅`,
         [[{ text: '💳 ادفع الآن $2.99', url: lemonLink }]]
