@@ -51,12 +51,21 @@ export default async function handler(req, res) {
       const chatId = customData?.telegram_chat_id || customData?.chat_id || '';
 
       if (chatId) {
-        const code = await getNextCode();
-        const expirySeconds = 30 * 24 * 60 * 60;
-        const expiryTimestamp = Date.now() + expirySeconds * 1000;
+        const oldCode = await kvGet('chatcode_' + chatId);
+        let code;
 
-        await kvSet('valid_' + code, 'monthly');
-        await kvSet('exp_' + code, String(expiryTimestamp));
+        if (oldCode) {
+          code = oldCode;
+          const currentExpiry = parseInt(await kvGet('exp_' + code) || '0');
+          const newExpiry = Math.max(currentExpiry, Date.now()) + 30 * 24 * 60 * 60 * 1000;
+          await kvSet('exp_' + code, String(newExpiry));
+        } else {
+          code = await getNextCode();
+          const expiryTimestamp = Date.now() + 30 * 24 * 60 * 60 * 1000;
+          await kvSet('valid_' + code, 'monthly');
+          await kvSet('exp_' + code, String(expiryTimestamp));
+          await kvSet('chatcode_' + chatId, code);
+        }
 
         const subscriptionId = body?.data?.id || '';
         if (subscriptionId) {
