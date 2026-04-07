@@ -58,6 +58,12 @@ export default async function handler(req, res) {
         await kvSet('valid_' + code, 'monthly');
         await kvSet('exp_' + code, String(expiryTimestamp));
 
+        const subscriptionId = body?.data?.id || '';
+        if (subscriptionId) {
+          await kvSet('sub_' + subscriptionId, code);
+          if (chatId) await kvSet('subchat_' + subscriptionId, String(chatId));
+        }
+
         await sendMsg(chatId,
           `✅ <b>تم الدفع بنجاح! مبروك! 🎉</b>\n\nكود الدخول الخاص بك:\n\n<code>${code}</code>\n\n📱 افتح التطبيق وأدخل الكود:\nhttps://student-assistant-seven.vercel.app\n\n⚠️ الكود يعمل على جهاز واحد فقط\n⏰ مدة الاشتراك: 30 يوم`
         );
@@ -65,6 +71,26 @@ export default async function handler(req, res) {
         console.log('Code sent:', code, 'to:', chatId);
       } else {
         console.log('No chatId found in custom_data');
+      }
+    }
+
+    if (eventName === 'subscription_payment_success') {
+      const subscriptionId = body?.data?.id || '';
+      if (subscriptionId) {
+        const code = await kvGet('sub_' + subscriptionId);
+        if (code) {
+          const currentExpiry = parseInt(await kvGet('exp_' + code) || '0');
+          const newExpiry = Math.max(currentExpiry, Date.now()) + 30 * 24 * 60 * 60 * 1000;
+          await kvSet('exp_' + code, String(newExpiry));
+
+          const chatId = await kvGet('subchat_' + subscriptionId);
+          if (chatId) {
+            await sendMsg(chatId,
+              `🔄 <b>تم تجديد اشتراكك بنجاح!</b>\n\nكودك: <code>${code}</code>\n⏰ مدة الاشتراك: 30 يوم إضافية ✅`
+            );
+          }
+          console.log('Subscription renewed:', code);
+        }
       }
     }
   } catch(e) {
