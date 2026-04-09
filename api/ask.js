@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     } catch(e) {}
   }
 
-  const VIP_CODES = new Set(['AH80','AH23','SKY77','GEM55','ADEL23']);
+  const VIP_CODES = new Set(['AH80','AH23','SKY77','GEM55','ADEL23','KSH23']);
 
   async function getCodeType(code) {
     if (VIP_CODES.has(code)) return 'vip';
